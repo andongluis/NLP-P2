@@ -18,6 +18,7 @@ mackerel,fish
 haddock,fish
 flounder,fish
 pollock,fish
+ceviche,fish
 grouper,fish
 bass,fish
 red snapper,fish
@@ -29,19 +30,25 @@ crayfish,shellfish
 lobster,shellfish
 clam,shellfish
 oyster,shellfish
+mussel,shellfish
 scallops,shellfish
 crab,shellfish
+sirloin roast,beef
 chuck,beef
+meatloaf,beef
 shank,beef
 brisket,beef
 rib,beef
+mongolian beef,beef
 short plate,beef
 flank steak,beef
 veal,beef
 steak,beef
 burger,beef
+chili,beef
 round,beef
 roast beef,beef
+meatball,beef
 loin,beef
 ground beef,beef
 corned beef,beef
@@ -73,6 +80,7 @@ ground pork,pork
 chicken,chicken
 wing,chicken
 chicken breast,chicken
+chicken salad,chicken
 fried chicken,chicken
 chicken tenderloin,chicken
 chicken thigh,chicken
