@@ -3,8 +3,11 @@ from helper import parsing
 def main():
 
 
-	page_links = ["https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
-				  "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/"]
+	page_links = [
+				  "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+				  # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
+				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/"
+				  ]
 
 
 
@@ -35,26 +38,35 @@ def main():
 		print(steps)
 
 
-		'''
-
-
-		# some id's:
-		# - lst_ingredients_1
-		# - lst_ingredients_2
-
-		class="list-ingredients-1"
-		class="list-ingredients-2"
-		sections: 
-		class="recipe-directions"
-		class = "directions--section__steps"
-		class="prepTime"
-		class="prepTime__item"
-
-		class="recipe-directions__list"
-		class="recipe-directions__list--item"
+		# See if ingredient parsing alright
+		for ingred in ingreds:
+			print(ingred)
+			print(parsing.extract_ingredient(ingred))
 
 
 		'''
+		Pipeline of project:
+
+		0. Build datasets from stored csv files
+
+		1. INPUT: Get url from user
+
+		2. Parse website
+
+		3. Make data objects
+
+		4. INPUT: Get transformation from user
+
+		5. Transform data based on user input
+
+		6. Print transformed data
+
+		7. Return to 4 or Exit
+		'''
+
+
+
+
 
 if __name__ == "__main__":
 	main()
