@@ -42,7 +42,7 @@ def get_preptime(soup):
 def get_steps(soup):
     # Takes in Soup content, returns list of steps as string
     steps_tags = soup.find_all(class_="recipe-directions__list--item")
-    steps = [steps_tag.get_text() for steps_tag in steps_tags]
+    steps = [steps_tag.get_text().strip() for steps_tag in steps_tags]
     steps = reduce(concat, [step.split(". ") for step in steps if step != ""])
     return steps
 
@@ -54,7 +54,6 @@ MEASUREMENTS = ["cup", "pound", "can", "teaspoon", "tablespoon",
 MEASUREMENTS.extend([meas + "s" for meas in MEASUREMENTS])
 
 
-
 def get_measurement(in_string):
     for measurement in MEASUREMENTS:
         if measurement + " " in in_string:
@@ -62,7 +61,8 @@ def get_measurement(in_string):
     return None
 
 
-QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced"]
+QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
+              "dried", "patty", "patties", "baked", ]
 
 
 def get_qualifiers(in_string):
@@ -112,20 +112,6 @@ def extract_ingredient(in_string):
      measurement: "",
      qualifiers: ["", ""]}
      NOTE: If some unspecified quantity (e.g. "to taste"), put 0. Might need to alter this depending on what we see
-
-     ['1 1/2 pounds salmon fillets', 'lemon pepper to taste', 'garlic powder to taste', 'salt to taste',
-     '1/3 cup soy sauce', '1/3 cup brown sugar', '1/3 cup water', '1/4 cup vegetable oil']
-
-     ['3/4 cup white sugar', '1/3 cup all-purpose flour', '1/4 teaspoon salt', '2 cups milk', '3 egg yolks, beaten', 
-     '2 tablespoons butter', '1 1/4 teaspoons vanilla extract', '1 (9 inch) baked pastry shell, cooled', '4 bananas, sliced']
-
-     ['1 pound sweet Italian sausage', '3/4 pound lean ground beef', '1/2 cup minced onion', '2 cloves garlic, crushed',
-     '1 (28 ounce) can crushed tomatoes', '2 (6 ounce) cans tomato paste', '2 (6.5 ounce) cans canned tomato sauce',
-     '1/2 cup water', '2 tablespoons white sugar', '1 1/2 teaspoons dried basil leaves', '1/2 teaspoon fennel seeds',
-     '1 teaspoon Italian seasoning', '1 1/2 teaspoons salt, divided, or to taste', '1/4 teaspoon ground black pepper',
-     '4 tablespoons chopped fresh parsley', '12 lasagna noodles', '16 ounces ricotta cheese', '1 egg',
-     '3/4 pound mozzarella cheese, sliced', '3/4 cup grated Parmesan cheese']
-
     '''
     ingred_dict = {"food_group": "",
                    "quantity": None,
@@ -192,3 +178,57 @@ def get_nutritional_value(soup):
 def get_tools(step):
     # TOOD: Take in a step string, return a list of tools for cooking that are used in this step
     return []
+
+
+
+import spacy
+from fuzzywuzzy import fuzz
+from spacy.lang.en.stop_words import STOP_WORDS
+NLP = spacy.load("en_core_web_sm")
+NOT_USEFUL_NOUNS = set()
+
+def get_chunks(str):
+    return [chunk.text for chunk in NLP(str).noun_chunks if chunk.text not in STOP_WORDS and chunk.text not in NOT_USEFUL_NOUNS]
+
+
+def ingredient_match(candidate, ingredients):
+    # candidate_str will likely be either substring of an ingredient name
+    # or a set substring of the ingredient+qualifiers
+
+
+    return [ingred.orig_name for ingred in ingredients if fuzz.partial_ratio(candidate, ingred.orig_name) == 100 ]
+
+
+def get_ingredients_step(step, ingred_list):
+    # Return a dict with the following:
+    """
+    {"string": string with placeholder values replacing ingredient strings
+     "placeholders": {
+                        placeholder_string: ingredient,
+                        ... 
+                     }
+        
+    }
+    """
+    print(step)
+    # Noun chunk string
+    noun_chunks = get_chunks(step)
+    print(noun_chunks)
+
+
+    placeholders = {}
+    # For each noun chunk
+    counter = 0
+    for noun_chunk in noun_chunks:
+        matches = ingredient_match(noun_chunk, ingred_list)
+        print(matches)
+        if len(matches) > 0:
+            match = matches[0]
+            placehold_id = f"<{counter}>"
+            counter += 1
+            placeholders[placehold_id] = match
+            step = step.replace(noun_chunk, placehold_id, 1)
+
+    print(placeholders)
+    print(step)
+

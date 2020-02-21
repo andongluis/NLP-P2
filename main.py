@@ -1,5 +1,7 @@
 from helper import parsing
 
+from helper.data_building import Ingredient
+
 def main():
 
 
@@ -39,10 +41,12 @@ def main():
 
 
 		# See if ingredient parsing alright
-		for ingred in ingreds:
-			print(ingred)
-			print(parsing.extract_ingredient(ingred))
 
+		ingred_list = [Ingredient(ingred) for ingred in ingreds]
+
+		print(ingred_list)
+
+		[parsing.get_ingredients_step(step, ingred_list) for step in steps]
 
 		'''
 		Pipeline of project:
