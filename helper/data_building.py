@@ -1,5 +1,6 @@
 # Functions for building data structures and reading in stuff from csv files
 # Class objects too
+import pandas as pd
 from parsing import *
 
 class FoodGroup:
@@ -112,10 +113,12 @@ class RecipeObject:
 
 	
 
-def make_fg_db(path="./data/file.csv"):
-
-
-	return
+def make_fg_db(paths=["./data/file.csv"]):
+	fg_dataframes = {}
+	for path in paths:
+		df = pd.read_excel(path)
+		fg_dataframes[df.keys()[0]] = df
+	return fg_dataframes
 
 
 
