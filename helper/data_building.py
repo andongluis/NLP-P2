@@ -1,6 +1,9 @@
 # Functions for building data structures and reading in stuff from csv files
 # Class objects too
 import pandas as pd
+import parsing
+
+
 from parsing import *
 
 class FoodGroup:
@@ -113,11 +116,25 @@ class RecipeObject:
 
 	
 
-def make_fg_db(paths=["./data/file.csv"]):
+def make_fg_db(paths=["food_groups/meat.xlsx"]):
+	'''
+	:param paths: list of paths for excel files, each containing a food group hierarchy
+	:return: dictionary of dictionaries, each containing all properties and values as key-value pairs
+				for each food group
+	'''
 	fg_dataframes = {}
 	for path in paths:
-		df = pd.read_excel(path)
-		fg_dataframes[df.keys()[0]] = df
+		df = pd.read_excel(path, sheet_name=None)
+		for k, v in df.items():
+			fg_dataframes[k] = {}
+			for index, row in v.iterrows():
+				prop = row['property']
+				val = row['value']
+				if val == 'TRUE' or val == 'true':
+					val = True
+				elif val == 'FALSE' or val == 'false':
+					val = False
+				fg_dataframes[k][prop] = val
 	return fg_dataframes
 
 
