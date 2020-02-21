@@ -116,7 +116,7 @@ class RecipeObject:
 
 	
 
-def make_fg_db(paths=["food_groups/meat.xlsx"]):
+def make_fg_db(paths=["food_groups/meat.xlsx", "food_groups/carbs.xlsx"]):
 	'''
 	:param paths: list of paths for excel files, each containing a food group hierarchy
 	:return: dictionary of dictionaries, each containing all properties and values as key-value pairs
