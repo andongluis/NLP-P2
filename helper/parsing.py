@@ -62,7 +62,7 @@ def get_measurement(in_string):
 
 
 QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
-              "dried", "patty", "patties", "baked", ]
+              "dried", "patty", "patties", "baked", "fresh", "sweet", "Italian"]
 
 
 def get_qualifiers(in_string):
@@ -139,7 +139,7 @@ def extract_ingredient(in_string):
     quant_string = re.search('(\d+\s?\d*?\/?\d*? )', in_string)
     if quant_string:
         quant_string = quant_string.group(0)
-    in_string = in_string.replace(quant_string, "")
+        in_string = in_string.replace(quant_string, "")
     if quantity != 0:
         quantity = float(sum(Fraction(s) for s in quant_string.split()))
 
@@ -158,7 +158,7 @@ def extract_ingredient(in_string):
 
 
     # obtain food group:
-    ingred_dict["food_group"] = in_string
+    ingred_dict["food_group"] = in_string.lower()
 
 
     return ingred_dict
@@ -187,6 +187,9 @@ from spacy.lang.en.stop_words import STOP_WORDS
 NLP = spacy.load("en_core_web_sm")
 NOT_USEFUL_NOUNS = set()
 
+
+import re
+
 def get_chunks(str):
     return [chunk.text for chunk in NLP(str).noun_chunks if chunk.text not in STOP_WORDS and chunk.text not in NOT_USEFUL_NOUNS]
 
@@ -196,7 +199,18 @@ def ingredient_match(candidate, ingredients):
     # or a set substring of the ingredient+qualifiers
 
 
-    return [ingred.orig_name for ingred in ingredients if fuzz.partial_ratio(candidate, ingred.orig_name) == 100 ]
+    return [ingred for ingred in ingredients if fuzz.token_set_ratio(candidate, ingred.orig_name) == 100]
+
+
+def extract_number(string):
+    # NOTE: fractions
+    
+    lst = [int(s) for s in string.split() if s.isdigit()]
+    return lst[0] if lst else None
+
+
+def find_all_str(phrase, string):
+    return [(m.start(), m.start() + len(string) )for m in re.finditer(phrase, string)]
 
 
 def get_ingredients_step(step, ingred_list):
@@ -204,31 +218,115 @@ def get_ingredients_step(step, ingred_list):
     """
     {"string": string with placeholder values replacing ingredient strings
      "placeholders": {
-                        placeholder_string: ingredient,
+                        placeholder_string: {"ingredient": str,
+                                             "quantity": float,
+                                            }
                         ... 
                      }
         
     }
+
+
+    to do list:
+    - try ignoring noun chunks, doing a simple "contains" for each of the ingredients we have,
+    if it is contained, then we know we ought to be looking for that ingredient in that string.
+    the next step would be to identify what part of the string has that ingredient, and additional
+    words before/after it (e.g. half of the potatoes, sliced cheese)
+
+    - try other noun chunkings (e.g. nltk)
+
+
+    - do both: contains-ing and noun chunking to try to match things up
+
+
+    - dealing with numbers: make sure to store/remove the number (or ignore it)
+
+
+    -briefly looking at victors code, it seems like there is no easy way of parsing ingreds from step
+    
+    - so, might just need to put in a lott of work into parsing this
+
+    - have an mvp asap so that quinn can begin working on printing
+
     """
-    print(step)
+    # print(step)
+
+
+    step = step.lower()
+
+
+    ### Noun Chunking Approach
+
     # Noun chunk string
     noun_chunks = get_chunks(step)
-    print(noun_chunks)
+    # print(noun_chunks)
+
+    counter = 0
 
 
     placeholders = {}
+
+
+
     # For each noun chunk
-    counter = 0
+    
     for noun_chunk in noun_chunks:
         matches = ingredient_match(noun_chunk, ingred_list)
-        print(matches)
+
+        # TODO: HANDLE QUANTITIES PROPERLY
+        quant = extract_number(noun_chunk)
+
+        # print(matches)
         if len(matches) > 0:
             match = matches[0]
             placehold_id = f"<{counter}>"
             counter += 1
-            placeholders[placehold_id] = match
-            step = step.replace(noun_chunk, placehold_id, 1)
+            placeholders[placehold_id] = {"ingredient": match, "quantity": quant}
+            step = step.replace(noun_chunk, placehold_id)
 
-    print(placeholders)
-    print(step)
+    # print(placeholders)
+    # print(step)
+
+
+    ### Contains Approach
+
+    # # For each ingredient:
+    for ingred in ingred_list:
+
+        # Try find entire phrase, if found, great
+        if ingred.orig_name in step:
+            placehold_id = f"<{counter}>"
+            counter += 1
+
+            # TODO: HANDLE QUANTITIES PROPERLY
+            quant = None
+
+            placeholders[placehold_id] = {"ingredient": ingred, "quantity": quant}
+            step = step.replace(ingred.orig_name, placehold_id)
+
+            counter += 1
+
+        # else:
+        #     # Use find for each stringsplit in ingred in the step,
+
+        #     nouns = [chunk.text for chunk in NLP(ingred.orig_name) if chunk.pos_ == "NOUN"]
+        #     # print(ingred.orig_name)
+        #     # print(nouns)
+        #     for noun in nouns:
+        #         if noun in step:
+        #             placehold_id = f"<{counter}>"
+        #             counter += 1
+
+        #             # TODO: HANDLE QUANTITIES PROPERLY
+        #             quant = None
+
+        #             placeholders[placehold_id] = {"ingredient": ingred, "quantity": quant}
+        #             step = step.replace(noun, placehold_id)
+
+        #             counter += 1
+
+    # print(placeholders)
+    # print(step)
+
+    return {"string": step, "placeholders": placeholders}
 

@@ -1,4 +1,6 @@
-from helper import parsing
+from helper import parsing, data_building
+import pathlib
+
 
 from helper.data_building import Ingredient
 
@@ -6,8 +8,8 @@ def main():
 
 
 	page_links = [
-				  "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
-				  # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
+				  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+				  "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
 				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/"
 				  ]
 

@@ -1,6 +1,8 @@
 # Functions for building data structures and reading in stuff from csv files
 # Class objects too
-from .parsing import extract_ingredient
+
+import pandas as pd
+from . import parsing
 
 def find_food_group(food_string):
     # Go through food group database, find corresponding food group
@@ -28,13 +30,19 @@ class FoodGroup:
         # self.vegan = False
         # self.substitutes = [] # maybe consider not having substitutes, might be a lot of work
 
+    def __repr__(self):
+        return f"Name: {self.name}, Super Group: {self.super_food_group}, Qualities: {self.qualities}"
+
+    def __str__(self):
+        return self.__repr__()
+
 class Ingredient:
 
     def __init__(self, in_string):
         # in_string is "raw" string from 
 
         # Parse/Extract things
-        str_dict = extract_ingredient(in_string)
+        str_dict = parsing.extract_ingredient(in_string)
 
         # Original string name
         self.orig_name = str_dict["food_group"]
@@ -52,7 +60,7 @@ class Ingredient:
         self.qualifiers = str_dict["qualifiers"]
 
     def __repr__(self):
-        return f"Name: {self.orig_name}\n Quantity: {self.quantity} {self.measurement}\n Qualifiers: {self.qualifiers}"
+        return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}"
 
     def __str__(self):
         return self.__repr__()
@@ -87,9 +95,12 @@ class Ingredient:
 
 class Step:
 
-    def __init__(self, method, ingredients):
+    def __init__(self, orig_str, ingred_list):
         # 
-        pass
+        self.orig_string = orig_str
+        place_dict = parsing.get_ingredients_step(step, ingred_list)
+        self.placeholder_string = place_dict["string"]
+        self.placeholders = place_dict["placeholders"]
 
 
 
@@ -109,7 +120,7 @@ class RecipeObject:
         ingreds = parsing.get_ingredients(soup)
         print(ingreds)
         # Make ingredient list
-        self.ingred_list = []
+        self.ingred_list = parsing.extract_ingredient(ingreds)
 
 
         # Get Prep Time
@@ -123,11 +134,27 @@ class RecipeObject:
         steps = parsing.get_steps(soup)
         print(steps)
         # Make steps list(have ingredients in these link to ones in ingredient list)
-        self.steps = []
-
-    
-
-def make_fg_db(path="./data/file.csv"):
+        self.steps = [Step(step) for step in steps]
 
 
-    return
+
+def make_fg_db(paths=["food_groups/meat.xlsx"]):
+    '''
+    :param paths: list of paths for excel files, each containing a food group hierarchy
+    :return: dictionary of dictionaries, each containing all properties and values as key-value pairs
+                for each food group
+    '''
+    fg_dataframes = {}
+    for path in paths:
+        df = pd.read_excel(path, sheet_name=None)
+        for k, v in df.items():
+            fg_dataframes[k] = {}
+            for index, row in v.iterrows():
+                prop = row['property']
+                val = row['value']
+                if val == 'TRUE' or val == 'true':
+                    val = True
+                elif val == 'FALSE' or val == 'false':
+                    val = False
+                fg_dataframes[k][prop] = val
+    return fg_dataframes
