@@ -9,8 +9,10 @@ def main():
 
 	page_links = [
 				  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
-				  "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
-				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/"
+				  # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
+				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
+				  # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
+				  "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/"
 				  ]
 
 

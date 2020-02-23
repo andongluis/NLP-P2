@@ -49,7 +49,7 @@ def get_steps(soup):
 
 
 MEASUREMENTS = ["cup", "pound", "can", "teaspoon", "tablespoon",
-                "ounce", "clove"]
+                "ounce", "clove", "package", "pinch"]
 
 MEASUREMENTS.extend([meas + "s" for meas in MEASUREMENTS])
 
@@ -62,7 +62,9 @@ def get_measurement(in_string):
 
 
 QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
-              "dried", "patty", "patties", "baked", "fresh", "sweet", "Italian"]
+              "dried", "patty", "patties", "baked", "fresh", "semisweet", "sweet", "Italian",
+              "extra-virgin", "extra virgin", "virgin", "dry", "finely", "unsalted",
+              "mashed"]
 
 
 def get_qualifiers(in_string):
@@ -213,6 +215,16 @@ def find_all_str(phrase, string):
     return [(m.start(), m.start() + len(string) )for m in re.finditer(phrase, string)]
 
 
+
+
+
+COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour "]
+def remove_common_noise(string):
+    for garbage in COMMON_GARBAGE:
+        if string.startswith(garbage):
+            string = string.replace(garbage, "")
+    return string
+
 def get_ingredients_step(step, ingred_list):
     # Return a dict with the following:
     """
@@ -258,8 +270,12 @@ def get_ingredients_step(step, ingred_list):
     ### Noun Chunking Approach
 
     # Noun chunk string
-    noun_chunks = get_chunks(step)
+    noun_chunks = get_chunks(" ".join(step.split()[1:]))
     # print(noun_chunks)
+
+    noun_chunks = [remove_common_noise(chunk) for chunk in noun_chunks]
+    # print(noun_chunks)
+
 
     counter = 0
 
