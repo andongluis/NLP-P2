@@ -2,13 +2,17 @@ from helper import parsing, data_building
 import pathlib
 
 
+from helper.data_building import Ingredient
+
 def main():
 
 
 	page_links = [
-				  "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+				  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
 				  # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
-				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/"
+				  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
+				  # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
+				  "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/"
 				  ]
 
 
@@ -41,10 +45,12 @@ def main():
 
 
 		# See if ingredient parsing alright
-		for ingred in ingreds:
-			print(ingred)
-			print(parsing.extract_ingredient(ingred))
 
+		ingred_list = [Ingredient(ingred) for ingred in ingreds]
+
+		print(ingred_list)
+
+		[parsing.get_ingredients_step(step, ingred_list) for step in steps]
 
 		'''
 		Pipeline of project:
