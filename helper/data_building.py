@@ -3,6 +3,9 @@
 
 import pandas as pd
 from . import parsing
+from itertools import chain
+
+
 
 def find_food_group(food_string):
     # Go through food group database, find corresponding food group
@@ -38,11 +41,7 @@ class FoodGroup:
 
 class Ingredient:
 
-    def __init__(self, in_string):
-        # in_string is "raw" string from 
-
-        # Parse/Extract things
-        str_dict = parsing.extract_ingredient(in_string)
+    def __init__(self, str_dict):
 
         # Original string name
         self.orig_name = str_dict["food_group"]
@@ -60,7 +59,7 @@ class Ingredient:
         self.qualifiers = str_dict["qualifiers"]
 
     def __repr__(self):
-        return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}"
+        return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}\n"
 
     def __str__(self):
         return self.__repr__()
@@ -120,7 +119,10 @@ class RecipeObject:
         ingreds = parsing.get_ingredients(soup)
         print(ingreds)
         # Make ingredient list
-        self.ingred_list = parsing.extract_ingredient(ingreds)
+        print(type(ingreds))
+        ingred_list = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
+
+        self.ingred_list = [Ingredient(ingred) for ingred in ingred_list ]
 
 
         # Get Prep Time
