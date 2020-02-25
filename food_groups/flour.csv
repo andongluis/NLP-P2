@@ -1,0 +1,33 @@
+flour,gluten,substitute
+cassava flour,FALSE,null
+chickpea (garbanzo) flour,FALSE,null
+chapati flour,TRUE,gluten-free chapati flour
+dal flour,FALSE,null
+fufu flour,FALSE,null
+kamut flour,TRUE,amaranth flour
+millet flour,FALSE,null
+teff flour,FALSE,null
+almond meal/flour,FALSE,null
+amaranth flour,FALSE,null
+barley flour,TRUE,buckwheat flour
+buckwheat flour,FALSE,null
+corn flour,FALSE,null
+flaxseed flour or meal,FALSE,null
+oat flour,FALSE,null
+peanut flour,FALSE,null
+potato flour,FALSE,null
+rice flour brown,FALSE,null
+rice flour white,FALSE,null
+rye flour,TRUE,teff flour
+soy flour,FALSE,null
+spelt flour,TRUE,amaranth flour
+all purpose flour,TRUE,all purpose gluten-free flour
+100% whole-wheat flour,TRUE,100% whole-wheat gluten-free flour
+white whole-wheat flour,TRUE,white whole-wheat gluten-free flour
+self-rising flour,TRUE,amaranth flour
+pastry flour,TRUE,gluten-free pastry flour
+cake flour,TRUE,gluten-free cake flour
+bread flour,TRUE,gluten-free bread flour
+gluten flour,TRUE,amaranth flour
+semolina flour,TRUE,buckwheat flour
+teff flour,FALSE,null
