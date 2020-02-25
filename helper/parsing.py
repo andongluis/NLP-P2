@@ -9,7 +9,7 @@ from operator import concat
 
 import re
 from fractions import Fraction
-
+from copy import deepcopy
 
 def get_page(page_url):
     # Returns BeautifulSoup content for page_url
@@ -49,7 +49,7 @@ def get_steps(soup):
 
 
 MEASUREMENTS = ["cup", "pound", "can", "teaspoon", "tablespoon",
-                "ounce", "clove", "package", "pinch"]
+                "ounce", "clove", "package", "pinch", "container", "slice"]
 
 MEASUREMENTS.extend([meas + "s" for meas in MEASUREMENTS])
 
@@ -62,9 +62,9 @@ def get_measurement(in_string):
 
 
 QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
-              "dried", "patty", "patties", "baked", "fresh", "semisweet", "sweet", "Italian",
+              "dried", "patty", "patties", "baked", "freshly", "fresh", "semisweet", "sweet", "Italian",
               "extra-virgin", "extra virgin", "virgin", "dry", "finely", "unsalted",
-              "mashed"]
+              "mashed", "day-old", "small", "frozen", "kosher", "shredded"]
 
 
 def get_qualifiers(in_string):
@@ -89,13 +89,18 @@ def get_qualifiers(in_string):
     if len(split_comma) > 1:
         comma_portion = split_comma[1]
 
+
         # remove parenthesis from string
         # print(in_string)
         # print(comma_portion)
         in_string = in_string.replace(", " + comma_portion, "")
         # print(in_string)
 
-        quals.append(comma_portion)
+        # Further split by ",", "and", and "or"
+
+        post_comma_list = re.split(", |and |or ", comma_portion)
+        # print(post_comma_list)
+        quals.extend(post_comma_list)
 
     # Get common qualifiers
     for qual in QUALIFIERS:
@@ -103,16 +108,22 @@ def get_qualifiers(in_string):
             quals.append(qual)
             in_string = in_string.replace(qual + " ", "")
 
+
+    quals = [qual.strip() for qual in quals if qual.strip() != ""]
+
     return quals, in_string
 
 
 def extract_ingredient(in_string):
     '''
-    return following dict:
-    {food_group: "",
+    return list of following dict(s):
+    [{food_group: "",
      quantity: float,
      measurement: "",
-     qualifiers: ["", ""]}
+     qualifiers: ["", ""]}]
+
+     It is a list bc there might be weirdd instances where there are two ingredients listed in one entry
+     (most often salt and pepper)
      NOTE: If some unspecified quantity (e.g. "to taste"), put 0. Might need to alter this depending on what we see
     '''
     ingred_dict = {"food_group": "",
@@ -125,6 +136,11 @@ def extract_ingredient(in_string):
     if "to taste" in in_string:
         # quantity is to taste
         in_string = in_string.replace("to taste", "")
+        # Leave quantity as 0 just as placeholder value
+        quantity = 0
+    elif "as needed" in in_string:
+        # quantity is to taste
+        in_string = in_string.replace("as needed", "")
         # Leave quantity as 0 just as placeholder value
         quantity = 0
     else:
@@ -159,11 +175,22 @@ def extract_ingredient(in_string):
 
 
 
-    # obtain food group:
-    ingred_dict["food_group"] = in_string.lower()
+    ingred_split = in_string.split("and")
 
+    if len(ingred_split) == 1:
 
-    return ingred_dict
+        # obtain food group:
+        ingred_dict["food_group"] = in_string.lower()
+
+        return [ingred_dict]
+    else:
+        return_lst = []
+        for ingred in ingred_split:
+            ingred_dict_i = deepcopy(ingred_dict)
+            ingred_dict_i["food_group"] = ingred.lower().strip()
+            return_lst.append(ingred_dict_i)
+
+        return return_lst
 
 
 
@@ -218,7 +245,7 @@ def find_all_str(phrase, string):
 
 
 
-COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour "]
+COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the "]
 def remove_common_noise(string):
     for garbage in COMMON_GARBAGE:
         if string.startswith(garbage):
@@ -261,7 +288,7 @@ def get_ingredients_step(step, ingred_list):
     - have an mvp asap so that quinn can begin working on printing
 
     """
-    # print(step)
+    print(step)
 
 
     step = step.lower()
@@ -271,10 +298,10 @@ def get_ingredients_step(step, ingred_list):
 
     # Noun chunk string
     noun_chunks = get_chunks(" ".join(step.split()[1:]))
-    # print(noun_chunks)
+    print(noun_chunks)
 
     noun_chunks = [remove_common_noise(chunk) for chunk in noun_chunks]
-    # print(noun_chunks)
+    print(noun_chunks)
 
 
     counter = 0
@@ -292,7 +319,7 @@ def get_ingredients_step(step, ingred_list):
         # TODO: HANDLE QUANTITIES PROPERLY
         quant = extract_number(noun_chunk)
 
-        # print(matches)
+        print(matches)
         if len(matches) > 0:
             match = matches[0]
             placehold_id = f"<{counter}>"
@@ -300,8 +327,8 @@ def get_ingredients_step(step, ingred_list):
             placeholders[placehold_id] = {"ingredient": match, "quantity": quant}
             step = step.replace(noun_chunk, placehold_id)
 
-    # print(placeholders)
-    # print(step)
+    print(placeholders)
+    print(step)
 
 
     ### Contains Approach
@@ -341,8 +368,8 @@ def get_ingredients_step(step, ingred_list):
 
         #             counter += 1
 
-    # print(placeholders)
-    # print(step)
+    print(placeholders)
+    print(step)
 
     return {"string": step, "placeholders": placeholders}
 
