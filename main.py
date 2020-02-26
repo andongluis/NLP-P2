@@ -42,6 +42,7 @@ def main():
         ingreds = parsing.get_ingredients(soup)
         print(ingreds)
 
+        db = data_building.make_fg_db()
 
         # Get Prep Time
         print("\nPREP TIME")
