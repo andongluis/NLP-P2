@@ -1,4 +1,4 @@
-from helper import parsing, data_building
+from helper import parsing, data_building, printing
 import pathlib
 
 
@@ -25,6 +25,30 @@ def main():
 
     "https://www.allrecipes.com/recipe/45736/chicken-tikka-masala/",
     '''
+
+    # while True:
+    #     url = input("Enter URL: ")
+
+    #     # need to make full list of transformations available
+    #     transformation = input("Select transformation:\n1. Vegetarian\n2. Double\n3. Exit")
+        
+    #     if transformation == 3:
+    #         break
+        
+    #     # parse for these
+    #     try:
+    #         # may also check that the url is for allrecipes.com/is a recipe page
+    #         soup = parsing.get_page(url)
+    #     except:
+    #         print("Invaled url")
+    #         continue
+    #     title_text = parsing.get_title(soup)
+    #     ingreds = parsing.get_ingredients(soup)
+    #     time_dict = parsing.get_preptime(soup)
+    #     steps = parsing.get_steps(soup)
+
+    #     #transform them and call printing
+    #     #printing.printTransformed(...)
 
 
 
@@ -67,6 +91,9 @@ def main():
 
         [parsing.get_ingredients_step(step, ingred_list) for step in steps]
 
+        # prints using final printing function
+        printing.printTransformed(title_text, ingred_list, time_dict, steps, page_link)
+        
         '''
         Pipeline of project:
 
