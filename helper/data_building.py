@@ -56,7 +56,7 @@ class Ingredient:
         self.fg_db = recipe_obj[1]
         
         # Food group maps
-        self.fg_db = recipe_obj[0]
+        self.fg_maps = recipe_obj[0]
 
         # Original string name
         self.orig_name = str_dict["food_group"]
@@ -80,12 +80,12 @@ class Ingredient:
         return self.__repr__()
 
 
-    def is_quality(self, quality, recipe_obj):
-        # Check if ingredient is quality (vegetarian, vegan, healthy, gluten, lactose)
+    def is_quality(self, quality):
+        # Check if ingredient is quality (vegetarian, vegan, healthy, gluten-free, lactose-free)
         # Return bool
-        if quality in self.food_group.qualities:
-            return self.food_group.qualities[quality]
-        return False
+        if quality in self.fg_db[self.food_group]:
+            return self.fg_db[self.food_group][quality]
+        return True
 
 
     def multiply_quantity(self, quant=2):
@@ -97,6 +97,12 @@ class Ingredient:
 
 
     def make_quality(self, quality):
+        if not self.is_quality(quality):
+            if quality in self.sub_dict:
+                if self.orig_name in self.sub_dict[quality]:
+                    self.orig_name = self.sub_dict[quality][self.orig_name]
+            else:
+                print('No default substitution for '+quality+' given.')
         # Makes an ingredient a specific type of quality
 
         # NOTE: might have to think about how to do this for e.g. flours
@@ -157,9 +163,8 @@ class RecipeObject:
 
 
 
-def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","food_groups/bread.csv","food_groups/pasta.csv",
-                      "food_groups/flour.csv","food_groups/meat.xlsx",
-                      "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
+def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/gluten-free.csv",
+                      "food_groups/meat.xlsx", "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
                       "food_groups/dairy.xlsx"]):
     '''
     :param paths: list of paths for excel files, each containing a food group hierarchy
