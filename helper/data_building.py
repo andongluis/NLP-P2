@@ -48,12 +48,21 @@ class FoodGroup:
 class Ingredient:
 
     def __init__(self, str_dict, recipe_obj):
+        
+        # Substitution dictionaries
+        self.sub_dict = recipe_obj[2]
+        
+        # Food group dictionaries
+        self.fg_db = recipe_obj[1]
+        
+        # Food group maps
+        self.fg_db = recipe_obj[0]
 
         # Original string name
         self.orig_name = str_dict["food_group"]
 
         # Find FoodGroup
-        self.food_group = find_food_group(self.orig_name, )
+        self.food_group = find_food_group(self.orig_name, recipe_obj[0])
 
         # Extract quantities
         self.quantity = str_dict["quantity"]
@@ -71,7 +80,7 @@ class Ingredient:
         return self.__repr__()
 
 
-    def is_quality(self, quality):
+    def is_quality(self, quality, recipe_obj):
         # Check if ingredient is quality (vegetarian, vegan, healthy, gluten, lactose)
         # Return bool
         if quality in self.food_group.qualities:
@@ -148,7 +157,7 @@ class RecipeObject:
 
 
 
-def make_fg_db(paths=["food_groups/bread.csv","food_groups/pasta.csv",
+def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","food_groups/bread.csv","food_groups/pasta.csv",
                       "food_groups/flour.csv","food_groups/meat.xlsx",
                       "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
                       "food_groups/dairy.xlsx"]):
@@ -159,14 +168,17 @@ def make_fg_db(paths=["food_groups/bread.csv","food_groups/pasta.csv",
     '''
     binary = ['gluten', 'healthy', 'vegetarian']
     categorical = ['style']
-    fg_dataframes = {}
+    fg_dicts = {}
     fg_substitutions = {}
     fg_groups = {}
     for path in paths:
-        if path[-4:] == "xlsx":
+        if path[:3] == 'csv':
+            df = pd.read_csv(path, encoding='latin1')
+            fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
+        elif path[-4:] == "xlsx":
             df = pd.read_excel(path, sheet_name=None)
             for k, v in df.items():
-                fg_dataframes[k] = {}
+                fg_dicts[k] = {}
                 for index, row in v.iterrows():
                     prop = row['property']
                     val = row['value']
@@ -174,8 +186,8 @@ def make_fg_db(paths=["food_groups/bread.csv","food_groups/pasta.csv",
                         val = True
                     elif val == 'FALSE' or val == 'false':
                         val = False
-                    fg_dataframes[k][prop] = val
+                    fg_dicts[k][prop] = val
         elif path[-3:] == "csv":
             df = pd.read_csv(path, encoding='latin1')
             fg_substitutions[path[12:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
-    return fg_groups, fg_dataframes, fg_substitutions
+    return fg_groups, fg_dicts, fg_substitutions

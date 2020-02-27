@@ -85,7 +85,7 @@ def main():
         # Parse/Extract things
         str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
 
-        ingred_list = [Ingredient(str_dict) for str_dict in str_dicts]
+        ingred_list = [Ingredient(str_dict, db) for str_dict in str_dicts]
 
         print(ingred_list)
 
