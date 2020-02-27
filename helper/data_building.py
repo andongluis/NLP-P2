@@ -12,7 +12,7 @@ def find_food_group(food_string, food_dicts):
     # If no corresponding group found, might need to make a default food group (or exit error)
 
     food_group = None
-    for d in food_dicts:
+    for d in food_dicts.values():
         if food_string in d:
             food_group = d[food_string]
     if not food_group:
@@ -83,8 +83,9 @@ class Ingredient:
     def is_quality(self, quality):
         # Check if ingredient is quality (vegetarian, vegan, healthy, gluten-free, lactose-free)
         # Return bool
-        if quality in self.fg_db[self.food_group]:
-            return self.fg_db[self.food_group][quality]
+        if self.food_group in self.fg_db:
+            if quality in self.fg_db[self.food_group]:
+                return self.fg_db[self.food_group][quality]
         return True
 
 
@@ -110,7 +111,7 @@ class Ingredient:
         # Do we just look for a substitute thing that has that alternate quality
 
         # Return nothing
-        return
+        return self
 
 
 class Step:
@@ -194,5 +195,5 @@ def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/glute
                     fg_dicts[k][prop] = val
         elif path[-3:] == "csv":
             df = pd.read_csv(path, encoding='latin1')
-            fg_substitutions[path[12:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
+            fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
     return fg_groups, fg_dicts, fg_substitutions
