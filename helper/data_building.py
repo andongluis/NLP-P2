@@ -98,12 +98,15 @@ class Ingredient:
 
 
     def make_quality(self, quality):
-        if not self.is_quality(quality):
-            if quality in self.sub_dict:
-                if self.orig_name in self.sub_dict[quality]:
-                    self.orig_name = self.sub_dict[quality][self.orig_name]
-            else:
-                print('No default substitution for '+quality+' given.')
+        if quality == 'healthy' and self.food_group == 'condiment_group' or self.food_group == 'sweetener':
+            self.multiply_quantity(1/4)
+        else:
+            if not self.is_quality(quality):
+                if quality in self.sub_dict:
+                    if self.orig_name in self.sub_dict[quality]:
+                        self.orig_name = self.sub_dict[quality][self.orig_name]
+                else:
+                    print('No default substitution for '+quality+' given.')
         # Makes an ingredient a specific type of quality
 
         # NOTE: might have to think about how to do this for e.g. flours
@@ -119,9 +122,22 @@ class Step:
     def __init__(self, orig_str, ingred_list):
         # 
         self.orig_string = orig_str
-        place_dict = parsing.get_ingredients_step(step, ingred_list)
+        place_dict = parsing.get_ingredients_step(orig_str, ingred_list)
         self.placeholder_string = place_dict["string"]
         self.placeholders = place_dict["placeholders"]
+
+    def __repr__(self):
+        my_str = self.placeholder_string
+
+        for place_key, ingred in self.placeholders.items():
+            # print(ingred)
+            my_str = my_str.replace(place_key, ingred["ingredient"].orig_name)
+
+        return my_str
+
+    def __str__(self):
+        return self.__repr__()
+
 
 
 
@@ -162,11 +178,14 @@ class RecipeObject:
         # Make steps list(have ingredients in these link to ones in ingredient list)
         self.steps = [Step(step) for step in steps]
 
-
+def make_quality(quality, ingred_list):
+    if any(ing.is_quality for ing in ingred_list):
+        return [ing.make_quality(quality) for ing in ingred_list]
+    return ingred_list
 
 def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/gluten-free.csv",
                       "food_groups/meat.xlsx", "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
-                      "food_groups/dairy.xlsx"]):
+                      "food_groups/dairy.xlsx", "food_groups/sweetener", "csv/sweetener.csv"]):
     '''
     :param paths: list of paths for excel files, each containing a food group hierarchy
     :return: dictionary of dictionaries, each containing all properties and values as key-value pairs
