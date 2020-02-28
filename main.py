@@ -10,13 +10,16 @@ def main():
 
 
     page_links = [
-                  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
-                  # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
-                  # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
-                  # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
-                  # "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
-                  # "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
-                  # "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
+                  "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+                  "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
+                  "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
+                  "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
+                  "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
+                  "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
+                  "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
+                  "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
+                  "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
+                  "https://www.allrecipes.com/recipe/218120/hearty-meat-lasagna/"
                   ]
 
 
@@ -66,7 +69,7 @@ def main():
         ingreds = parsing.get_ingredients(soup)
         print(ingreds)
 
-        db = data_building.make_fg_db()
+        # db = data_building.make_fg_db()
 
         # Get Prep Time
         print("\nPREP TIME")
@@ -78,18 +81,25 @@ def main():
         steps = parsing.get_steps(soup)
         print(steps)
 
-
         # See if ingredient parsing alright
+
+
 
 
         # Parse/Extract things
         str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
+
+        print(str_dicts)
+
+        continue
 
         ingred_list = [Ingredient(str_dict, db) for str_dict in str_dicts]
 
         print('Before deglutenizing step')
 
         print(ingred_list)
+
+        print(steps)
 
         # Testing deglutenizer
 

@@ -180,6 +180,7 @@ def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/glute
     for path in paths:
         if path[:3] == 'csv':
             df = pd.read_csv(path, encoding='latin1')
+            print(path)
             fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
         elif path[-4:] == "xlsx":
             df = pd.read_excel(path, sheet_name=None)
