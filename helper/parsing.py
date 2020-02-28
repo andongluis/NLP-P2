@@ -28,6 +28,11 @@ def get_ingredients(soup):
     ingred_tags = soup.find_all(class_="recipe-ingred_txt")
     ingreds = [ingred_tag.get_text() for ingred_tag in ingred_tags]
     ingreds = [ingred for ingred in ingreds if ingred != "" and ingred != 'Add all ingredients to list']
+    if not ingreds:
+        # LIKELY DID NOT WORK, GONNA TRY NEW METHOD
+        ingred_tags = soup.find_all(class_="ingredients-item-name")
+        ingreds = [ingred_tag.get_text() for ingred_tag in ingred_tags]
+        ingreds = [ingred.strip() for ingred in ingreds if ingred != "" and ingred != 'Add all ingredients to list']
     return ingreds
 
 
@@ -36,6 +41,10 @@ def get_preptime(soup):
     prep_tags = soup.find_all(class_="prepTime__item")
     time_tags = [prep_tag.find_all("time")[0] for prep_tag in prep_tags if prep_tag.find_all("time")]
     time_dict = {time_tag['itemprop']: time_tag['datetime'] for time_tag in time_tags}
+    if not time_dict:
+        prep_tags = soup.find_all(class_="recipe-meta-item")
+        prep_dict = {tag.find(class_="recipe-meta-item-header").get_text().strip()[:-1] : tag.find(class_="recipe-meta-item-body").get_text().strip() for tag in prep_tags}
+        time_dict = {key + "Time": time for key, time in prep_dict.items() if key in ["prep", "cook", "total"]}
     return time_dict
 
 
@@ -43,7 +52,12 @@ def get_steps(soup):
     # Takes in Soup content, returns list of steps as string
     steps_tags = soup.find_all(class_="recipe-directions__list--item")
     steps = [steps_tag.get_text().strip() for steps_tag in steps_tags]
-    steps = reduce(concat, [step.split(". ") for step in steps if step != ""])
+    
+    if not steps:
+        steps_tags = soup.find_all(class_="instructions-section-item")
+        # print(steps_tags)
+        steps = [steps_tag.find(class_="section-body").get_text().strip() for steps_tag in steps_tags]
+    steps = reduce(concat, [step.split(". ") for step in steps if step != ""])        
     return steps
 
 
@@ -130,6 +144,19 @@ def extract_ingredient(in_string):
                    "quantity": None,
                    "measurement": "",
                    "qualifiers": []}
+
+
+    # Parsing in casee of the weird fraction case
+    in_string = in_string.replace(u"½", u"1/2")
+    in_string = in_string.replace(u"¾", u"3/4")
+    in_string = in_string.replace(u"⅓", u"1/3")
+    in_string = in_string.replace(u"¼", u"1/4")
+
+    # in_string = in_string.replace(u"\u2009", u" ")
+    in_string = in_string.replace(u"⅔", u"2/3")
+    in_string = in_string.replace(u"⅛", u"1/8")
+    # in_string = in_string.replace(u"¼", u"1/4")    
+
 
 
     # To taste:

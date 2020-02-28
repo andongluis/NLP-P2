@@ -7,11 +7,17 @@ from itertools import chain
 
 
 
-def find_food_group(food_string):
+def find_food_group(food_string, food_dicts):
     # Go through food group database, find corresponding food group
     # If no corresponding group found, might need to make a default food group (or exit error)
 
-    return FoodGroup(food_string)
+    food_group = None
+    for d in food_dicts.values():
+        if food_string in d:
+            food_group = d[food_string]
+    if not food_group:
+        return food_string
+    return food_group
 
 class FoodGroup:
     # Should really only be called when creating the init food group database
@@ -41,13 +47,22 @@ class FoodGroup:
 
 class Ingredient:
 
-    def __init__(self, str_dict):
+    def __init__(self, str_dict, recipe_obj):
+        
+        # Substitution dictionaries
+        self.sub_dict = recipe_obj[2]
+        
+        # Food group dictionaries
+        self.fg_db = recipe_obj[1]
+        
+        # Food group maps
+        self.fg_maps = recipe_obj[0]
 
         # Original string name
         self.orig_name = str_dict["food_group"]
 
         # Find FoodGroup
-        self.food_group = find_food_group(str_dict["food_group"])
+        self.food_group = find_food_group(self.orig_name, recipe_obj[0])
 
         # Extract quantities
         self.quantity = str_dict["quantity"]
@@ -66,11 +81,12 @@ class Ingredient:
 
 
     def is_quality(self, quality):
-        # Check if ingredient is quality (vegetarian, vegan, healthy, gluten, lactose)
+        # Check if ingredient is quality (vegetarian, vegan, healthy, gluten-free, lactose-free)
         # Return bool
-        if quality in self.food_group.qualities:
-            return self.food_group.qualities[quality]
-        return False
+        if self.food_group in self.fg_db:
+            if quality in self.fg_db[self.food_group]:
+                return self.fg_db[self.food_group][quality]
+        return True
 
 
     def multiply_quantity(self, quant=2):
@@ -82,6 +98,12 @@ class Ingredient:
 
 
     def make_quality(self, quality):
+        if not self.is_quality(quality):
+            if quality in self.sub_dict:
+                if self.orig_name in self.sub_dict[quality]:
+                    self.orig_name = self.sub_dict[quality][self.orig_name]
+            else:
+                print('No default substitution for '+quality+' given.')
         # Makes an ingredient a specific type of quality
 
         # NOTE: might have to think about how to do this for e.g. flours
@@ -89,7 +111,7 @@ class Ingredient:
         # Do we just look for a substitute thing that has that alternate quality
 
         # Return nothing
-        return
+        return self
 
 
 class Step:
@@ -107,7 +129,9 @@ class RecipeObject:
 
     def __init__(self, url_link):
 
-        soup = parsing.get_page(page_link)
+        soup = parsing.get_page(url_link)
+
+        self.food_group_dict = make_fg_db()
 
         print("TITLE")
         title_text = parsing.get_title(soup)
@@ -140,23 +164,37 @@ class RecipeObject:
 
 
 
-def make_fg_db(paths=["food_groups/meat.xlsx"]):
+def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/gluten-free.csv",
+                      "food_groups/meat.xlsx", "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
+                      "food_groups/dairy.xlsx"]):
     '''
     :param paths: list of paths for excel files, each containing a food group hierarchy
     :return: dictionary of dictionaries, each containing all properties and values as key-value pairs
                 for each food group
     '''
-    fg_dataframes = {}
+    binary = ['gluten', 'healthy', 'vegetarian']
+    categorical = ['style']
+    fg_dicts = {}
+    fg_substitutions = {}
+    fg_groups = {}
     for path in paths:
-        df = pd.read_excel(path, sheet_name=None)
-        for k, v in df.items():
-            fg_dataframes[k] = {}
-            for index, row in v.iterrows():
-                prop = row['property']
-                val = row['value']
-                if val == 'TRUE' or val == 'true':
-                    val = True
-                elif val == 'FALSE' or val == 'false':
-                    val = False
-                fg_dataframes[k][prop] = val
-    return fg_dataframes
+        if path[:3] == 'csv':
+            df = pd.read_csv(path, encoding='latin1')
+            print(path)
+            fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
+        elif path[-4:] == "xlsx":
+            df = pd.read_excel(path, sheet_name=None)
+            for k, v in df.items():
+                fg_dicts[k] = {}
+                for index, row in v.iterrows():
+                    prop = row['property']
+                    val = row['value']
+                    if val == 'TRUE' or val == 'true':
+                        val = True
+                    elif val == 'FALSE' or val == 'false':
+                        val = False
+                    fg_dicts[k][prop] = val
+        elif path[-3:] == "csv":
+            df = pd.read_csv(path, encoding='latin1')
+            fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
+    return fg_groups, fg_dicts, fg_substitutions
