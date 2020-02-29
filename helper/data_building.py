@@ -2,6 +2,8 @@
 # Class objects too
 
 import pandas as pd
+import random
+import os
 from . import parsing
 from itertools import chain
 
@@ -14,10 +16,9 @@ def find_food_group(food_string, food_dicts):
     food_group = None
     for d in food_dicts.values():
         if food_string in d:
-            food_group = d[food_string]
+            return d[food_string]
     if not food_group:
         return food_string
-    return food_group
 
 class FoodGroup:
     # Should really only be called when creating the init food group database
@@ -86,7 +87,7 @@ class Ingredient:
         if self.food_group in self.fg_db:
             if quality in self.fg_db[self.food_group]:
                 return self.fg_db[self.food_group][quality]
-        return True
+        return False
 
 
     def multiply_quantity(self, quant=2):
@@ -98,8 +99,23 @@ class Ingredient:
 
 
     def make_quality(self, quality):
-        if quality == 'healthy' and self.food_group == 'condiment_group' or self.food_group == 'sweetener':
-            self.multiply_quantity(1/4)
+        if quality == 'healthy' and (self.food_group == 'condiment_group' or self.food_group == 'sweetener'):
+            self.multiply_quantity(0.4)
+        elif quality == 'unhealthy' and self.food_group == 'sweetener':
+            self.multiply_quantity(1.25)
+        elif quality[:7] == 'country':
+            if not self.is_quality(quality) and self.orig_name not in self.sub_dict[quality]:
+                if quality in self.sub_dict:
+                    if self.food_group in self.fg_db:
+                        if self.food_group in self.sub_dict[quality].values() or \
+                                self.fg_db[self.food_group]['food super group'] in self.sub_dict[quality].values():
+                            list_of_options = [k for k, v in self.sub_dict[quality].items() if v == self.food_group or
+                                               v == self.fg_db[self.food_group]['food super group']]
+                            self.orig_name = random.choice(list_of_options) if len(list_of_options) > 0 else self.orig_name
+                    else:
+                        if self.food_group in self.sub_dict[quality].values():
+                            list_of_options = [k for k, v in self.sub_dict[quality].items() if v == self.food_group]
+                            self.orig_name = random.choice(list_of_options) if len(list_of_options) > 0 else self.orig_name
         else:
             if not self.is_quality(quality):
                 if quality in self.sub_dict:
@@ -183,16 +199,14 @@ def make_quality(quality, ingred_list):
         return [ing.make_quality(quality) for ing in ingred_list]
     return ingred_list
 
-def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/gluten-free.csv",
-                      "food_groups/meat.xlsx", "food_groups/carbs.xlsx", "food_groups/fats.xlsx",
-                      "food_groups/dairy.xlsx", "food_groups/sweetener", "csv/sweetener.csv"]):
+def make_fg_db():
     '''
     :param paths: list of paths for excel files, each containing a food group hierarchy
     :return: dictionary of dictionaries, each containing all properties and values as key-value pairs
                 for each food group
     '''
-    binary = ['gluten', 'healthy', 'vegetarian']
-    categorical = ['style']
+    path_list = ['csv', 'substitutions', 'food_groups']
+    paths = [l + '/' + d for l in path_list for d in os.listdir(l)]
     fg_dicts = {}
     fg_substitutions = {}
     fg_groups = {}
@@ -215,5 +229,8 @@ def make_fg_db(paths=["csv/meats.csv","csv/pasta_group.csv","substitutions/glute
                     fg_dicts[k][prop] = val
         elif path[-3:] == "csv":
             df = pd.read_csv(path, encoding='latin1')
-            fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
+            if path[14:21] == 'country':
+                fg_substitutions[path[14:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
+            else:
+                fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
     return fg_groups, fg_dicts, fg_substitutions

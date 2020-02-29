@@ -76,9 +76,9 @@ def get_measurement(in_string):
 
 
 QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
-              "dried", "patty", "patties", "baked", "freshly", "fresh", "semisweet", "sweet", "Italian",
+              "dried", "patty", "patties", "baked", "freshly", "fresh", "semisweet", "sweet",
               "extra-virgin", "extra virgin", "virgin", "dry", "finely", "unsalted",
-              "mashed", "day-old", "small", "frozen", "kosher", "shredded"]
+              "mashed", "day-old", "small", "frozen", "kosher", "shredded", "lean"]
 
 
 def get_qualifiers(in_string):
