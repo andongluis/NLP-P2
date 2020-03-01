@@ -121,6 +121,8 @@ def main():
             if transformation in valid_transformations:
                 quality = valid_transformations[transformation]
                 valid = True
+            else:
+                print('Invalid transformation.')
 
         print('Before transformation step')
 
@@ -142,7 +144,7 @@ def main():
         if quality == 'non-vegetarian':
             should_slap_meat = data_building.slap_some_meat_on_there(ingred_list)
             if should_slap_meat:
-                steps_list.append(Step('Slap a 52 ounce steak on there raw.', ingred_list))
+                steps_list.append(Step('Slap a 20 ounce steak on there raw.', ingred_list))
 
         # [parsing.get_ingredients_step(step, ingred_list, post_sub_ingred_list) for step in steps]
 
