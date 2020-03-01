@@ -76,9 +76,9 @@ def get_measurement(in_string):
 
 
 QUALIFIERS = ["grated", "chopped", "crushed", "minced", "beaten", "cooled", "sliced",
-              "dried", "patty", "patties", "baked", "freshly", "fresh", "semisweet", "sweet", "Italian",
+              "dried", "patty", "patties", "baked", "freshly", "fresh", "semisweet", "sweet",
               "extra-virgin", "extra virgin", "virgin", "dry", "finely", "unsalted",
-              "mashed", "day-old", "small", "frozen", "kosher", "shredded"]
+              "mashed", "day-old", "small", "frozen", "kosher", "shredded", "lean"]
 
 
 def get_qualifiers(in_string):
@@ -279,6 +279,12 @@ def remove_common_noise(string):
             string = string.replace(garbage, "")
     return string
 
+def get_ingred_sub(ingred, ingred_list, ingred_sub_list):
+    index = ingred_list.index(ingred)
+    if ingred != ingred_sub_list[index]:
+        return ingred_sub_list[index]
+    return ingred
+
 def get_ingredients_step(step, ingred_list):
     # Return a dict with the following:
     """
@@ -315,7 +321,7 @@ def get_ingredients_step(step, ingred_list):
     - have an mvp asap so that quinn can begin working on printing
 
     """
-    print(step)
+    # print(step)
 
 
     step = step.lower()
@@ -346,7 +352,7 @@ def get_ingredients_step(step, ingred_list):
         # TODO: HANDLE QUANTITIES PROPERLY
         quant = extract_number(noun_chunk)
 
-        print(matches)
+        # print(matches)
         if len(matches) > 0:
             match = matches[0]
             placehold_id = f"<{counter}>"
@@ -354,8 +360,8 @@ def get_ingredients_step(step, ingred_list):
             placeholders[placehold_id] = {"ingredient": match, "quantity": quant}
             step = step.replace(noun_chunk, placehold_id)
 
-    print(placeholders)
-    print(step)
+    # print(placeholders)
+    # print(step)
 
 
     ### Contains Approach
@@ -395,8 +401,10 @@ def get_ingredients_step(step, ingred_list):
 
         #             counter += 1
 
-    print(placeholders)
-    print(step)
+    # print('************************\n************************\nprinting placeholders')
+    # print(placeholders)
+    # print('************************\n************************\nprinting step')
+    # print(step)
 
     return {"string": step, "placeholders": placeholders}
 
