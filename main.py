@@ -103,7 +103,7 @@ def main():
 
         print(steps)
 
-        quality = 'country_swedish'
+        quality = 'vegetarian'
 
         # Testing deglutenizer
         ingred_list = data_building.make_quality(quality, ingred_list)

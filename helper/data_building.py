@@ -122,7 +122,15 @@ class Ingredient:
                     if self.orig_name in self.sub_dict[quality]:
                         self.orig_name = self.sub_dict[quality][self.orig_name]
                 else:
-                    print('No default substitution for '+quality+' given.')
+                    if self.food_group in self.fg_db:
+                        found = False
+                        while self.fg_db[self.food_group]['food super group'] != self.food_group and not found:
+                            if quality+' substitute' in self.fg_db[self.food_group]:
+                                found = True
+                                self.orig_name = self.fg_db[self.food_group][quality+' substitute']
+                            else:
+                                self.food_group = self.fg_db[self.food_group]['food super group']
+                                print('No default substitution for '+quality+' given.')
         # Makes an ingredient a specific type of quality
 
         # NOTE: might have to think about how to do this for e.g. flours
