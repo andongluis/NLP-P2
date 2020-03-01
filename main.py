@@ -13,9 +13,9 @@ def main():
                   # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
                   # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
                   # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
-                  # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
+                  "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
                   # "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
-                  "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
+                  # "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
                   # "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
                   # "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
@@ -84,6 +84,25 @@ def main():
         # See if ingredient parsing alright
 
 
+        # Parse/Extract things
+        str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
+        db = data_building.make_fg_db()
+        ingred_list = [Ingredient(str_dict, db) for str_dict in str_dicts]
+
+
+        for ingred in ingred_list:
+            print(ingred)
+            
+
+        steps_list = [Step(step, ingred_list) for step in steps]
+
+        for step in steps_list:
+            print("Real print")
+            print(step)
+            step.verbose_print()
+            print()
+
+        exit()
 
 
         # Parse/Extract things

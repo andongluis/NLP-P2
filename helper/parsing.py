@@ -235,33 +235,37 @@ TOOLS = ["saucepan", "wok", "skillet", "baking dish", "pot", "pan", "oven", "sto
         "peeler", "masher", "blender", "whisk", "pin", "colander", "press", "ladle",
         "thermometer", "glove", "mit", "scissors", "grill", "measuring cup", "measuring spoon",
         "spinner", "cutter", "shear", "rod", "stockpot", "wrap", "plastic wrap", "grate",
-        "platter", "foil", "brush", "tablespoon", "teaspoon", "hammer", "boil", "chop", "chopping"]
+        "platter", "foil", "brush", "tablespoon", "teaspoon", "hammer", "boil", "chop", "chopping",
+        "bowl"]
 TOOLS.extend([t + "s" for t in TOOLS])
 
 def get_tools(step):
+    step_tools = []
     for tool in TOOLS:
-        if tool + " " in step:
+        if tool + " " in step or "tool" + "," in step:
             # covers edge cases where tools aren't specified
             if tool == "tablespoon" or tool == "teaspoon":
-                return "measuring spoon"
+                step_tools.append("measuring spoon")
             if tool == "boil":
-                return "pot"
+                step_tools.append("pot")
             if tool == "chop":
-                return "knife"
-            return tool
-    return None
+                step_tools.append("knife")
+            step_tools.append(tool)
+    return step_tools
     # TOOD: Take in a step string, return a list of tools for cooking that are used in this step
 
 METHODS = ["sauté", "boil", "broil", "poach", "sear", "steam", "shop", "grate", "mince", "shake",
             "squeeze", "crush", "grill", "fry", "simmer", "roast", "bast", "brown", "brine", "blanch",
             "barbecue", "bake", "carmelize", "croquette", "cure", "deglaze", "dredge", "ferment", "fillet",
-            "frost", "garnish", "glaze", "pressure cook", "pasturize", "pickle", "smoke", "tenderize", "zest"]
+            "frost", "garnish", "glaze", "pressure cook", "pasturize", "pickle", "smoke", "tenderize", "zest",
+            "mix"]
 
-def get_method(step):
+def get_methods(step):
+    step_methods = []
     for method in METHODS:
         if method + " " in step:
-            return method
-    return None
+            step_methods.append(method)
+    return step_methods
 
 import spacy
 from fuzzywuzzy import fuzz
@@ -284,11 +288,6 @@ def ingredient_match(candidate, ingredients):
     return [ingred for ingred in ingredients if fuzz.token_set_ratio(candidate, ingred.orig_name) == 100]
 
 
-def extract_number(string):
-    # NOTE: fractions
-    
-    lst = [int(s) for s in string.split() if s.isdigit()]
-    return lst[0] if lst else None
 
 
 def find_all_str(phrase, string):
@@ -297,8 +296,9 @@ def find_all_str(phrase, string):
 
 
 
-
-COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the "]
+COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the ", "<100> ", "<101> ",
+                  "> ", "teaspoons ",
+                  "tablespoons ", "teaspoon ", "tablespoon "]
 def remove_common_noise(string):
     for garbage in COMMON_GARBAGE:
         if string.startswith(garbage):
@@ -317,93 +317,43 @@ def get_ingredients_step(step, ingred_list):
     {"string": string with placeholder values replacing ingredient strings
      "placeholders": {
                         placeholder_string: {"ingredient": str,
-                                             "quantity": float,
                                             }
                         ... 
                      }
-        
     }
 
-
-    to do list:
-    - try ignoring noun chunks, doing a simple "contains" for each of the ingredients we have,
-    if it is contained, then we know we ought to be looking for that ingredient in that string.
-    the next step would be to identify what part of the string has that ingredient, and additional
-    words before/after it (e.g. half of the potatoes, sliced cheese)
-
-    - try other noun chunkings (e.g. nltk)
-
-
-    - do both: contains-ing and noun chunking to try to match things up
-
-
-    - dealing with numbers: make sure to store/remove the number (or ignore it)
-
-
-    -briefly looking at victors code, it seems like there is no easy way of parsing ingreds from step
-    
-    - so, might just need to put in a lott of work into parsing this
-
-    - have an mvp asap so that quinn can begin working on printing
-
     """
-    # print(step)
-
-
     step = step.lower()
 
-
-    ### Noun Chunking Approach
-
-    # Noun chunk string
-    noun_chunks = get_chunks(" ".join(step.split()[1:]))
-    print(noun_chunks)
-
-    noun_chunks = [remove_common_noise(chunk) for chunk in noun_chunks]
-    print(noun_chunks)
-
-
     counter = 0
-
-
     placeholders = {}
 
+     ### Noun Chunking Approach
+    # Noun chunk string
+    noun_chunks = get_chunks(" ".join(step.split()[1:]))
+    # print(noun_chunks)
+    noun_chunks = [remove_common_noise(chunk.strip()) for chunk in noun_chunks]
 
+    # print(noun_chunks)
 
-    # For each noun chunk
-    
+    # For each noun chunk 
     for noun_chunk in noun_chunks:
         matches = ingredient_match(noun_chunk, ingred_list)
-
-        # TODO: HANDLE QUANTITIES PROPERLY
-        quant = extract_number(noun_chunk)
-
-        # print(matches)
         if len(matches) > 0:
             match = matches[0]
             placehold_id = f"<{counter}>"
             counter += 1
-            placeholders[placehold_id] = {"ingredient": match, "quantity": quant}
+            placeholders[placehold_id] = {"ingredient": match}
             step = step.replace(noun_chunk, placehold_id)
 
-    # print(placeholders)
-    # print(step)
-
-
     ### Contains Approach
-
-    # # For each ingredient:
+    # For each ingredient:
     for ingred in ingred_list:
 
         # Try find entire phrase, if found, great
-        if ingred.orig_name in step:
+        if ingred.orig_name + " " in step or ingred.orig_name + "," in step:
             placehold_id = f"<{counter}>"
-            counter += 1
-
-            # TODO: HANDLE QUANTITIES PROPERLY
-            quant = None
-
-            placeholders[placehold_id] = {"ingredient": ingred, "quantity": quant}
+            placeholders[placehold_id] = {"ingredient": ingred}
             step = step.replace(ingred.orig_name, placehold_id)
 
             counter += 1
@@ -433,4 +383,84 @@ def get_ingredients_step(step, ingred_list):
     # print(step)
 
     return {"string": step, "placeholders": placeholders}
+
+
+
+
+NUM_DICT = {
+
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+
+}
+
+def get_quantities_step(in_string):
+    # Get placeholder dict for quantities, similar to ingredients above
+
+    # To avoid doublin temperatures or times, lazy solution
+    if "degree" in in_string or "minute" in in_string or "seconds" in in_string:
+        return {"string": in_string, "placeholders": {}}
+
+    counter = 100
+    placeholders = {}
+
+    # Parsing in casee of the weird fraction case
+    in_string = in_string.replace(u"½", u"1/2")
+    in_string = in_string.replace(u"¾", u"3/4")
+    in_string = in_string.replace(u"⅓", u"1/3")
+    in_string = in_string.replace(u"¼", u"1/4")
+
+    # in_string = in_string.replace(u"\u2009", u" ")
+    in_string = in_string.replace(u"⅔", u"2/3")
+    in_string = in_string.replace(u"⅛", u"1/8")
+    # in_string = in_string.replace(u"¼", u"1/4")    
+
+
+
+    # Dimensions of pans:
+    dimen_str = re.search('(\d+x\d+)', in_string)
+    if dimen_str:
+        dimen_str = dimen_str.group(0)
+
+        dimens = dimen_str.split("x")
+        placehold_id = f"<{counter}>"
+        counter += 1
+        in_string = in_string.replace(dimens[0] + "x", placehold_id + "x")
+        placeholders[placehold_id] = {"quantity": float(dimens[0])}
+
+        placehold_id = f"<{counter}>"
+        counter += 1
+        in_string = in_string.replace("x" + dimens[1], "x" + placehold_id)
+        placeholders[placehold_id] = {"quantity": float(dimens[1])}
+
+
+    # Fractions and numbers
+    quant_strs = re.findall('(\d+\s?\d*?\/?\d*? )', in_string)
+
+    # For each fraction
+    for quant_str in quant_strs:
+        placehold_id = f"<{counter}>"
+        counter += 1
+        placeholders[placehold_id] = {"quantity": float(sum(Fraction(s) for s in quant_str.split()))}
+        in_string = in_string.replace(quant_str, placehold_id + " ")
+
+
+
+    # Strings 
+    # Ignore for now
+
+
+    # print(in_string)
+    # print(placeholders)
+
+
+    return {"string": in_string, "placeholders": placeholders}
 

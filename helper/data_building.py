@@ -151,22 +151,44 @@ class Step:
     def __init__(self, orig_str, ingred_list):
         # 
         self.orig_string = orig_str
-        place_dict = parsing.get_ingredients_step(orig_str, ingred_list)
-        self.placeholder_string = place_dict["string"]
-        self.placeholders = place_dict["placeholders"]
+
+        quant_dict = parsing.get_quantities_step(orig_str)
+
+        ingred_dict = parsing.get_ingredients_step(quant_dict["string"], ingred_list)
+
+
+
+        self.placeholder_string = ingred_dict["string"]
+        self.ingred_placeholders = ingred_dict["placeholders"]
+        self.quant_placeholders = quant_dict["placeholders"]
+        self.tools = parsing.get_tools(self.placeholder_string)
+        self.methods = parsing.get_methods(self.placeholder_string)
+
+        
 
     def __repr__(self):
         my_str = self.placeholder_string
 
-        for place_key, ingred in self.placeholders.items():
+        for place_key, ingred in self.ingred_placeholders.items():
             # print(ingred)
             my_str = my_str.replace(place_key, ingred["ingredient"].orig_name)
 
-        return my_str
+
+        for quant_key, quant in self.quant_placeholders.items():
+            my_str = my_str.replace(quant_key, str(quant["quantity"]))
+
+        return my_str.strip().capitalize()
 
     def __str__(self):
         return self.__repr__()
 
+    def verbose_print(self):
+        print(f"Orig String: {self.orig_string}")
+        print(f"Tools: {self.tools}")
+        print(f"Methods: {self.methods}")
+        print(f"Placeholder str: {self.placeholder_string}")
+        print(f"Ingred Placeholder dict: {self.ingred_placeholders}")
+        print(f"Quant Placeholder dict: {self.quant_placeholders}")
 
 
 
@@ -242,6 +264,7 @@ def make_fg_db():
         if path[:3] == 'csv':
             df = pd.read_csv(path, encoding='latin1')
             print(path)
+            print(list(df))
             fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
         elif path[-4:] == "xlsx":
             df = pd.read_excel(path, sheet_name=None)
