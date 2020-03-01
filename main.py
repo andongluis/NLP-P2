@@ -86,27 +86,6 @@ def main():
 
         # Parse/Extract things
         str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
-        db = data_building.make_fg_db()
-        ingred_list = [Ingredient(str_dict, db) for str_dict in str_dicts]
-
-
-        for ingred in ingred_list:
-            print(ingred)
-            
-
-        steps_list = [Step(step, ingred_list) for step in steps]
-
-        for step in steps_list:
-            print("Real print")
-            print(step)
-            step.verbose_print()
-            print()
-
-        exit()
-
-
-        # Parse/Extract things
-        str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
 
         # print(str_dicts)
 
