@@ -52,7 +52,7 @@ class Ingredient:
         
         # Substitution dictionaries
         self.sub_dict = recipe_obj[2]
-        
+
         # Food group dictionaries
         self.fg_db = recipe_obj[1]
         
@@ -78,7 +78,11 @@ class Ingredient:
         return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}\n"
 
     def __str__(self):
-        return self.__repr__()
+        res = f"{self.quantity} "
+        for i in self.qualifiers:
+            res += i + " "
+        res += self.orig_name
+        return res
 
 
     def is_quality(self, quality):

@@ -230,12 +230,38 @@ def get_nutritional_value(soup):
     return []
 
 
+TOOLS = ["saucepan", "wok", "skillet", "baking dish", "pot", "pan", "oven", "stove",
+        "bowl", "knife", "spoon", "fork", "tongs", "spatula", "grater", "board", "can opener",
+        "peeler", "masher", "blender", "whisk", "pin", "colander", "press", "ladle",
+        "thermometer", "glove", "mit", "scissors", "grill", "measuring cup", "measuring spoon",
+        "spinner", "cutter", "shear", "rod", "stockpot", "wrap", "plastic wrap", "grate",
+        "platter", "foil", "brush", "tablespoon", "teaspoon", "hammer", "boil", "chop", "chopping"]
+TOOLS.extend([t + "s" for t in TOOLS])
 
 def get_tools(step):
+    for tool in TOOLS:
+        if tool + " " in step:
+            # covers edge cases where tools aren't specified
+            if tool == "tablespoon" or tool == "teaspoon":
+                return "measuring spoon"
+            if tool == "boil":
+                return "pot"
+            if tool == "chop":
+                return "knife"
+            return tool
+    return None
     # TOOD: Take in a step string, return a list of tools for cooking that are used in this step
-    return []
 
+METHODS = ["sauté", "boil", "broil", "poach", "sear", "steam", "shop", "grate", "mince", "shake",
+            "squeeze", "crush", "grill", "fry", "simmer", "roast", "bast", "brown", "brine", "blanch",
+            "barbecue", "bake", "carmelize", "croquette", "cure", "deglaze", "dredge", "ferment", "fillet",
+            "frost", "garnish", "glaze", "pressure cook", "pasturize", "pickle", "smoke", "tenderize", "zest"]
 
+def get_method(step):
+    for method in METHODS:
+        if method + " " in step:
+            return method
+    return None
 
 import spacy
 from fuzzywuzzy import fuzz
