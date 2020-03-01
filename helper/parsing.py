@@ -230,7 +230,7 @@ def get_nutritional_value(soup):
     return []
 
 
-TOOLS = ["saucepan", "wok", "skillet", "baking dish", "pot", "pan", "oven", "stove",
+TOOLS = ["sauce pan", "wok", "skillet", "baking dish", "pot", "pan", "oven", "stove",
         "bowl", "knife", "spoon", "fork", "tongs", "spatula", "grater", "board", "can opener",
         "peeler", "masher", "blender", "whisk", "pin", "colander", "press", "ladle",
         "thermometer", "glove", "mit", "scissors", "grill", "measuring cup", "measuring spoon",
