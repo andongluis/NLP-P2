@@ -106,8 +106,13 @@ class Ingredient:
     def make_quality(self, quality):
         if quality == 'healthy' and (self.food_group == 'condiment_group' or self.food_group == 'sweetener'):
             self = self.multiply_quantity(0.4)
-        elif quality == 'unhealthy' and self.food_group == 'sweetener':
-            self = self.multiply_quantity(1.25)
+        elif quality == 'unhealthy':
+            if (self.food_group == 'sweetener' or self.food_group == 'fats' or
+                                         (self.food_group in self.fg_db and
+                                          self.fg_db[self.food_group]['food super group'] == 'fats')):
+                self = self.multiply_quantity(1.25)
+            elif self.food_group == 'vegetable':
+                self = self.multiply_quantity(0.5)
         elif quality[:7] == 'country':
             if not self.is_quality(quality) and self.orig_name not in self.sub_dict[quality]:
                 if quality in self.sub_dict:
@@ -126,6 +131,8 @@ class Ingredient:
                 if quality in self.sub_dict:
                     if self.orig_name in self.sub_dict[quality]:
                         self.orig_name = self.sub_dict[quality][self.orig_name]
+                    elif self.food_group in self.sub_dict[quality]:
+                        self.orig_name = self.sub_dict[quality][self.food_group]
                 else:
                     if self.food_group in self.fg_db:
                         found = False
