@@ -78,7 +78,9 @@ class Ingredient:
         return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}\n"
 
     def __str__(self):
-        res = f"{self.quantity} {self.measurement} "
+        res = f"{self.quantity} "
+        if self.measurement != "unit":
+            res += f"{self.measurement} "
         for i in self.qualifiers:
             res += i + " "
         res += self.orig_name
