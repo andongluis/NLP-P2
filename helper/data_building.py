@@ -94,15 +94,16 @@ class Ingredient:
         # Multiply ingredient quantity by quant
         # Returns nothing
         self.quantity *= quant
+        return self
 
         # NOTE: Victor said this one might be tricky, so will likely need more debugging
 
 
     def make_quality(self, quality):
         if quality == 'healthy' and (self.food_group == 'condiment_group' or self.food_group == 'sweetener'):
-            self.multiply_quantity(0.4)
+            self = self.multiply_quantity(0.4)
         elif quality == 'unhealthy' and self.food_group == 'sweetener':
-            self.multiply_quantity(1.25)
+            self = self.multiply_quantity(1.25)
         elif quality[:7] == 'country':
             if not self.is_quality(quality) and self.orig_name not in self.sub_dict[quality]:
                 if quality in self.sub_dict:
@@ -203,9 +204,24 @@ class RecipeObject:
         self.steps = [Step(step) for step in steps]
 
 def make_quality(quality, ingred_list):
-    if any(ing.is_quality for ing in ingred_list):
-        return [ing.make_quality(quality) for ing in ingred_list]
+    if quality == 'double':
+        return [ing.multiply_quantity(2) for ing in ingred_list]
+    elif quality == 'half':
+        return [ing.multiply_quantity(1/2) for ing in ingred_list]
+    else:
+        if any(ing.is_quality for ing in ingred_list):
+            return [ing.make_quality(quality) for ing in ingred_list]
     return ingred_list
+
+def slap_some_meat_on_there(ingred_list):
+    for ing in ingred_list:
+        if ing.food_group in ing.fg_db:
+            while ing.fg_db[ing.food_group]['food super group'] != ing.food_group:
+                if ing.food_group == 'meat':
+                    return False
+                else:
+                    ing.food_group = ing.fg_db[ing.food_group]['food super group']
+    return True
 
 def make_fg_db():
     '''

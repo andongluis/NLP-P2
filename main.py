@@ -10,12 +10,12 @@ def main():
 
 
     page_links = [
-                  "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+                  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
                   # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
                   # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
                   # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
                   # "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
-                  # "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
+                  "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
                   # "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
                   # "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
@@ -95,7 +95,34 @@ def main():
 
         ingred_list = [Ingredient(str_dict, db) for str_dict in str_dicts]
 
-        print('Before deglutenizing step')
+        valid = False
+        valid_transformations = {
+            'v': 'vegetarian',
+            'nv': 'non-vegetarian',
+            'h': 'healthy',
+            'u': 'unhealthy',
+            'gf': 'gluten-free',
+            's': 'country_sweden',
+            'm': 'country_mexican',
+            'd': 'double',
+            'ha': 'half',
+        }
+        while not valid:
+            transformation = input('Choose how you want to transform the recipe:'
+                                   '\nv = vegetarian'
+                                   '\nnv = non-vegetarian'
+                                   '\nh = healthy'
+                                   '\nu = unhealthy'
+                                   '\ngf = gluten-free'
+                                   '\ns = swedish'
+                                   '\nm = mexican'
+                                   '\nd = double'
+                                   '\nha = half\n')
+            if transformation in valid_transformations:
+                quality = valid_transformations[transformation]
+                valid = True
+
+        print('Before transformation step')
 
         print(ingred_list)
 
@@ -103,19 +130,19 @@ def main():
 
         print(steps)
 
-        quality = 'vegetarian'
-
-        # Testing deglutenizer
+        # Testing transformation
         ingred_list = data_building.make_quality(quality, ingred_list)
 
-        print('After deglutenizing step')
+        print('After transformation step')
 
         print(ingred_list)
 
-        for s in steps_list:
-            print(s)
-
         print(steps_list)
+
+        if quality == 'non-vegetarian':
+            should_slap_meat = data_building.slap_some_meat_on_there(ingred_list)
+            if should_slap_meat:
+                steps_list.append(Step('Slap a 52 ounce steak on there raw.', ingred_list))
 
         # [parsing.get_ingredients_step(step, ingred_list, post_sub_ingred_list) for step in steps]
 
