@@ -299,9 +299,13 @@ def find_all_str(phrase, string):
 COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the ", "<100> ", "<101> ",
                   "> ", "teaspoons ",
                   "tablespoons ", "teaspoon ", "tablespoon "]
+END_GARBAGE = ["mixture"]
 def remove_common_noise(string):
     for garbage in COMMON_GARBAGE:
         if string.startswith(garbage):
+            string = string.replace(garbage, "")
+    for garbage in END_GARBAGE:
+        if string.endswith(garbage):
             string = string.replace(garbage, "")
     return string
 
@@ -431,10 +435,11 @@ def get_quantities_step(in_string):
         dimen_str = dimen_str.group(0)
 
         dimens = dimen_str.split("x")
-        placehold_id = f"<{counter}>"
-        counter += 1
-        in_string = in_string.replace(dimens[0] + "x", placehold_id + "x")
-        placeholders[placehold_id] = {"quantity": float(dimens[0])}
+        
+        # placehold_id = f"<{counter}>"
+        # counter += 1
+        # in_string = in_string.replace(dimens[0] + "x", placehold_id + "x")
+        # placeholders[placehold_id] = {"quantity": float(dimens[0])}
 
         placehold_id = f"<{counter}>"
         counter += 1

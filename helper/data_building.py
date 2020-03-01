@@ -78,7 +78,7 @@ class Ingredient:
         return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}\n"
 
     def __str__(self):
-        res = f"{self.quantity} "
+        res = f"{self.quantity} {self.measurement} "
         for i in self.qualifiers:
             res += i + " "
         res += self.orig_name
@@ -292,3 +292,11 @@ def make_fg_db():
             else:
                 fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
     return fg_groups, fg_dicts, fg_substitutions
+
+
+def multiply_step(step, multiplier):
+    for place_key, placeholder_dict in step.quant_placeholders.items():
+        step.quant_placeholders[place_key]["quantity"] *= multiplier
+
+    step.verbose_print()
+    return step
