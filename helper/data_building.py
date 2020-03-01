@@ -52,7 +52,7 @@ class Ingredient:
         
         # Substitution dictionaries
         self.sub_dict = recipe_obj[2]
-        
+
         # Food group dictionaries
         self.fg_db = recipe_obj[1]
         
@@ -78,7 +78,13 @@ class Ingredient:
         return f"Name: {self.orig_name}, Quantity: {self.quantity} {self.measurement}, Qualifiers: {self.qualifiers}\n"
 
     def __str__(self):
-        return self.__repr__()
+        res = f"{self.quantity} "
+        if self.measurement != "unit":
+            res += f"{self.measurement} "
+        for i in self.qualifiers:
+            res += i + " "
+        res += self.orig_name
+        return res
 
 
     def is_quality(self, quality):
@@ -94,15 +100,21 @@ class Ingredient:
         # Multiply ingredient quantity by quant
         # Returns nothing
         self.quantity *= quant
+        return self
 
         # NOTE: Victor said this one might be tricky, so will likely need more debugging
 
 
     def make_quality(self, quality):
         if quality == 'healthy' and (self.food_group == 'condiment_group' or self.food_group == 'sweetener'):
-            self.multiply_quantity(0.4)
-        elif quality == 'unhealthy' and self.food_group == 'sweetener':
-            self.multiply_quantity(1.25)
+            self = self.multiply_quantity(0.4)
+        elif quality == 'unhealthy':
+            if (self.food_group == 'sweetener' or self.food_group == 'fats' or
+                                         (self.food_group in self.fg_db and
+                                          self.fg_db[self.food_group]['food super group'] == 'fats')):
+                self = self.multiply_quantity(1.25)
+            elif self.food_group == 'vegetable':
+                self = self.multiply_quantity(0.5)
         elif quality[:7] == 'country':
             if not self.is_quality(quality) and self.orig_name not in self.sub_dict[quality]:
                 if quality in self.sub_dict:
@@ -121,6 +133,8 @@ class Ingredient:
                 if quality in self.sub_dict:
                     if self.orig_name in self.sub_dict[quality]:
                         self.orig_name = self.sub_dict[quality][self.orig_name]
+                    elif self.food_group in self.sub_dict[quality]:
+                        self.orig_name = self.sub_dict[quality][self.food_group]
                 else:
                     if self.food_group in self.fg_db:
                         found = False
@@ -146,22 +160,44 @@ class Step:
     def __init__(self, orig_str, ingred_list):
         # 
         self.orig_string = orig_str
-        place_dict = parsing.get_ingredients_step(orig_str, ingred_list)
-        self.placeholder_string = place_dict["string"]
-        self.placeholders = place_dict["placeholders"]
+
+        quant_dict = parsing.get_quantities_step(orig_str)
+
+        ingred_dict = parsing.get_ingredients_step(quant_dict["string"], ingred_list)
+
+
+
+        self.placeholder_string = ingred_dict["string"]
+        self.ingred_placeholders = ingred_dict["placeholders"]
+        self.quant_placeholders = quant_dict["placeholders"]
+        self.tools = parsing.get_tools(self.placeholder_string)
+        self.methods = parsing.get_methods(self.placeholder_string)
+
+        
 
     def __repr__(self):
         my_str = self.placeholder_string
 
-        for place_key, ingred in self.placeholders.items():
+        for place_key, ingred in self.ingred_placeholders.items():
             # print(ingred)
             my_str = my_str.replace(place_key, ingred["ingredient"].orig_name)
 
-        return my_str
+
+        for quant_key, quant in self.quant_placeholders.items():
+            my_str = my_str.replace(quant_key, str(quant["quantity"]))
+
+        return my_str.strip().capitalize()
 
     def __str__(self):
         return self.__repr__()
 
+    def verbose_print(self):
+        print(f"Orig String: {self.orig_string}")
+        print(f"Tools: {self.tools}")
+        print(f"Methods: {self.methods}")
+        print(f"Placeholder str: {self.placeholder_string}")
+        print(f"Ingred Placeholder dict: {self.ingred_placeholders}")
+        print(f"Quant Placeholder dict: {self.quant_placeholders}")
 
 
 
@@ -203,9 +239,24 @@ class RecipeObject:
         self.steps = [Step(step) for step in steps]
 
 def make_quality(quality, ingred_list):
-    if any(ing.is_quality for ing in ingred_list):
-        return [ing.make_quality(quality) for ing in ingred_list]
+    if quality == 'double':
+        return [ing.multiply_quantity(2) for ing in ingred_list]
+    elif quality == 'half':
+        return [ing.multiply_quantity(1/2) for ing in ingred_list]
+    else:
+        if any(ing.is_quality for ing in ingred_list):
+            return [ing.make_quality(quality) for ing in ingred_list]
     return ingred_list
+
+def slap_some_meat_on_there(ingred_list):
+    for ing in ingred_list:
+        if ing.food_group in ing.fg_db:
+            while ing.fg_db[ing.food_group]['food super group'] != ing.food_group:
+                if ing.food_group == 'meat':
+                    return False
+                else:
+                    ing.food_group = ing.fg_db[ing.food_group]['food super group']
+    return True
 
 def make_fg_db():
     '''
@@ -222,6 +273,7 @@ def make_fg_db():
         if path[:3] == 'csv':
             df = pd.read_csv(path, encoding='latin1')
             print(path)
+            print(list(df))
             fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
         elif path[-4:] == "xlsx":
             df = pd.read_excel(path, sheet_name=None)
@@ -242,3 +294,11 @@ def make_fg_db():
             else:
                 fg_substitutions[path[14:-4]] = pd.Series(df.substitute.values, index=df.name).to_dict()
     return fg_groups, fg_dicts, fg_substitutions
+
+
+def multiply_step(step, multiplier):
+    for place_key, placeholder_dict in step.quant_placeholders.items():
+        step.quant_placeholders[place_key]["quantity"] *= multiplier
+
+    step.verbose_print()
+    return step

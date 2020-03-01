@@ -25,6 +25,6 @@ def printTransformed(title, ingrediants, prep_time, steps, url):
     print("\n Steps:")
     count = 0
     for s in steps:
-        print("{}. {}".format(count+1, s))
-        count+= 1
+        print(f"{count+1}. {s}")
+        count += 1
     
