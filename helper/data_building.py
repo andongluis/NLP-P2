@@ -4,6 +4,7 @@
 import pandas as pd
 import random
 import os
+import copy
 from . import parsing
 from itertools import chain
 
@@ -105,7 +106,7 @@ class Ingredient:
         # NOTE: Victor said this one might be tricky, so will likely need more debugging
 
 
-    def make_quality(self, quality):
+    def make_quality(self, quality, food_dicts):
         if quality == 'healthy' and (self.food_group == 'condiment_group' or self.food_group == 'sweetener'):
             self = self.multiply_quantity(0.4)
         elif quality == 'unhealthy':
@@ -123,25 +124,34 @@ class Ingredient:
                                 self.fg_db[self.food_group]['food super group'] in self.sub_dict[quality].values():
                             list_of_options = [k for k, v in self.sub_dict[quality].items() if v == self.food_group or
                                                v == self.fg_db[self.food_group]['food super group']]
-                            self.orig_name = random.choice(list_of_options) if len(list_of_options) > 0 else self.orig_name
+                            if len(list_of_options) > 0:
+                                choice = random.choice(list_of_options)
+                                self.food_group = find_food_group(self.choice, food_dicts)
+                                self.orig_name = choice
                     else:
                         if self.food_group in self.sub_dict[quality].values():
                             list_of_options = [k for k, v in self.sub_dict[quality].items() if v == self.food_group]
-                            self.orig_name = random.choice(list_of_options) if len(list_of_options) > 0 else self.orig_name
+                            if len(list_of_options) > 0:
+                                choice = random.choice(list_of_options)
+                                self.food_group = find_food_group(choice, food_dicts)
+                                self.orig_name = choice
         else:
             if not self.is_quality(quality):
                 if quality in self.sub_dict:
                     if self.orig_name in self.sub_dict[quality]:
                         self.orig_name = self.sub_dict[quality][self.orig_name]
+                        self.food_group = find_food_group(self.orig_name, food_dicts)
                     elif self.food_group in self.sub_dict[quality]:
                         self.orig_name = self.sub_dict[quality][self.food_group]
+                        self.food_group = find_food_group(self.food_group, food_dicts)
                 else:
                     if self.food_group in self.fg_db:
                         found = False
-                        while self.fg_db[self.food_group]['food super group'] != self.food_group and not found:
+                        while not found and self.fg_db[self.food_group]['food super group'] != self.food_group:
                             if quality+' substitute' in self.fg_db[self.food_group]:
                                 found = True
                                 self.orig_name = self.fg_db[self.food_group][quality+' substitute']
+                                self.food_group = find_food_group(self.orig_name, food_dicts)
                             else:
                                 self.food_group = self.fg_db[self.food_group]['food super group']
                                 print('No default substitution for '+quality+' given.')
@@ -238,24 +248,26 @@ class RecipeObject:
         # Make steps list(have ingredients in these link to ones in ingredient list)
         self.steps = [Step(step) for step in steps]
 
-def make_quality(quality, ingred_list):
+def make_quality(quality, ingred_list, food_dicts):
     if quality == 'double':
         return [ing.multiply_quantity(2) for ing in ingred_list]
     elif quality == 'half':
         return [ing.multiply_quantity(1/2) for ing in ingred_list]
     else:
-        if any(ing.is_quality for ing in ingred_list):
-            return [ing.make_quality(quality) for ing in ingred_list]
+        if any(not ing.is_quality(quality) for ing in ingred_list):
+            return [ing.make_quality(quality, food_dicts) for ing in ingred_list]
     return ingred_list
 
 def slap_some_meat_on_there(ingred_list):
     for ing in ingred_list:
-        if ing.food_group in ing.fg_db:
-            while ing.fg_db[ing.food_group]['food super group'] != ing.food_group:
-                if ing.food_group == 'meat':
-                    return False
-                else:
-                    ing.food_group = ing.fg_db[ing.food_group]['food super group']
+        ing_copy = copy.copy(ing)
+        if ing_copy.food_group in ing_copy.fg_db:
+            if ing_copy.food_group == 'meat':
+                return False
+            while ing_copy.fg_db[ing_copy.food_group]['food super group'] != ing_copy.food_group:
+                ing_copy.food_group = ing_copy.fg_db[ing_copy.food_group]['food super group']
+            if ing_copy.food_group == 'meat':
+                return False
     return True
 
 def make_fg_db():
