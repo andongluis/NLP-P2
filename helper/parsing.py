@@ -299,7 +299,7 @@ def find_all_str(phrase, string):
 COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the ", "<100> ", "<101> ",
                   "> ", "teaspoons ",
                   "tablespoons ", "teaspoon ", "tablespoon "]
-END_GARBAGE = ["mixture"]
+END_GARBAGE = [" mixture"]
 def remove_common_noise(string):
     for garbage in COMMON_GARBAGE:
         if string.startswith(garbage):
@@ -410,7 +410,7 @@ def get_quantities_step(in_string):
     # Get placeholder dict for quantities, similar to ingredients above
 
     # To avoid doublin temperatures or times, lazy solution
-    if "degree" in in_string or "minute" in in_string or "seconds" in in_string:
+    if "degree" in in_string or "minute" in in_string or "seconds" in in_string or "inch" in in_string:
         return {"string": in_string, "placeholders": {}}
 
     counter = 100

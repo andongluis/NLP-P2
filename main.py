@@ -43,7 +43,7 @@ def main(page_link):
     # Parse/Extract things
     str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
 
-    # print(str_dicts)
+    print(str_dicts)
 
     db = data_building.make_fg_db()
 
@@ -93,8 +93,10 @@ def main(page_link):
 
         print(steps_list)
 
+        food_dict = db[0]
+
         # Testing transformation
-        ingred_list = data_building.make_quality(quality, ingred_list)
+        ingred_list = data_building.make_quality(quality, ingred_list, food_dict)
 
 
         # Transform step quantity if necessary:
@@ -114,6 +116,8 @@ def main(page_link):
         if quality == 'non-vegetarian':
             should_slap_meat = data_building.slap_some_meat_on_there(ingred_list)
             if should_slap_meat:
+                ing = parsing.extract_ingredient('1 (20 ounce) steak, raw')[0]
+                ingred_list.append(Ingredient(ing, db))
                 steps_list.append(Step('Slap a 20 ounce steak on there raw.', ingred_list))
 
         # [parsing.get_ingredients_step(step, ingred_list, post_sub_ingred_list) for step in steps]
@@ -144,16 +148,16 @@ if __name__ == "__main__":
     7. Return to 4 or Exit
     '''
     page_links = [
-                    "https://www.allrecipes.com/recipe/258170/easy-white-chocolate-ganache/",
-                  #  "https://www.allrecipes.com/recipe/33647/chocolate-ganache/",
-                  #"https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
+                  # "https://www.allrecipes.com/recipe/258170/easy-white-chocolate-ganache/",
+                  # "https://www.allrecipes.com/recipe/33647/chocolate-ganache/",
+                  # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
                   # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
                   # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
                   # "https://www.allrecipes.com/recipe/229960/shrimp-scampi-with-pasta/",
                   # "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
                   # "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
                   # "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
-                  # "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
+                  "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/218120/hearty-meat-lasagna/"
                   ]
