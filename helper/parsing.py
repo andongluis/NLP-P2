@@ -230,19 +230,19 @@ def get_nutritional_value(soup):
     return []
 
 
-TOOLS = ["sauce pan", "wok", "skillet", "baking dish", "pot", "pan", "oven", "stove",
+TOOLS = ["sauce pan", "wok", "saucepan", "dutch oven", "skillet", "baking dish", "pot", "pan", "oven", "stove",
         "bowl", "knife", "spoon", "fork", "tongs", "spatula", "grater", "board", "can opener",
         "peeler", "masher", "blender", "whisk", "pin", "colander", "press", "ladle",
         "thermometer", "glove", "mit", "scissors", "grill", "measuring cup", "measuring spoon",
         "spinner", "cutter", "shear", "rod", "stockpot", "wrap", "plastic wrap", "grate",
-        "platter", "foil", "brush", "tablespoon", "teaspoon", "hammer", "boil", "chop", "chopping",
-        "bowl"]
+        "platter", "foil", "brush", "tablespoon", "teaspoon", "hammer", "broiler", "chop", "chopping",
+        "bowl", "casserole dish"]
 TOOLS.extend([t + "s" for t in TOOLS])
 
 def get_tools(step):
     step_tools = []
     for tool in TOOLS:
-        if tool + " " in step or "tool" + "," in step:
+        if tool + " " in step or tool + "," in step or tool + "." in step or tool in step:
             # covers edge cases where tools aren't specified
             if tool == "tablespoon" or tool == "teaspoon":
                 step_tools.append("measuring spoon")

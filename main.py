@@ -51,6 +51,10 @@ def main(page_link):
 
     steps_list = [Step(step, ingred_list) for step in steps]
 
+    tools_list = [step.tools for step in steps_list]
+    
+    methods_list = [step.methods for step in steps_list]
+
     valid = False
     valid_transformations = {
         'v': 'vegetarian',
@@ -123,7 +127,7 @@ def main(page_link):
         # [parsing.get_ingredients_step(step, ingred_list, post_sub_ingred_list) for step in steps]
 
         # prints using final printing function
-        printing.printTransformed(title_text, ingred_list, time_dict, steps_list, page_link)
+        printing.printTransformed(title_text, ingred_list, time_dict, steps_list, page_link, tools_list, methods_list)
     
 
 
