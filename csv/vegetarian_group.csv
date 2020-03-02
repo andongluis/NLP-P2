@@ -2,6 +2,8 @@ name,group
 tofu,vegetarian
 plant-based pork,vegetarian
 plant-based ground beef,vegetarian
+plant-based red meat,vegetarian
+lean plant-based red meat,vegetarian
 imitation crab,vegetarian
 imitation lobster,vegetarian
 mushroom,vegetarian
@@ -11,3 +13,4 @@ seitan,vegetarian
 tempeh,vegetarian
 lentils,vegetarian
 legumes,vegetarian
+black beans,vegetarian

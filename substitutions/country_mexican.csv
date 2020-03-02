@@ -7,20 +7,16 @@ white meat,shredded chicken
 condiment,chipotle peppers
 red meat,barbacoa
 red meat,arrachera
-bread,corn tortilla
+bread,corn tortillas
 red meat,ground beef
 red meat,chorizo
-red meat,pölsa
 white meat,tilapia
 herb,oregano
 vegetable,carrot
 vegetable,zucchini
-spice,black pepper
-spice,white pepper
 vegetable,onion
 vegetable,garlic
 seasoning,black pepper
-seasoning,white pepper
 herb,cilantro
 herb,coriander
 condiment,Valentina hot sauce
@@ -28,8 +24,16 @@ spice,cardamom
 spice,cumin
 condiment,mole
 condiment,lime
-vegatable,tomato
+vegatable,tomatoes
 vegetarian,black beans
 vegetarian,lentils
 condiment,chile de arbol
 vegetable,mushroom
+vegetable,tomatillo
+condiment,guacamole
+condiment,pico de gallo
+grain,corn flour
+fruit,mango
+fruit,lime
+fruit,papaya
+spice,garlic
