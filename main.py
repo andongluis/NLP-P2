@@ -149,7 +149,7 @@ if __name__ == "__main__":
     '''
     page_links = [
                   # "https://www.allrecipes.com/recipe/258170/easy-white-chocolate-ganache/",
-                  "https://www.allrecipes.com/recipe/33647/chocolate-ganache/",
+                  # "https://www.allrecipes.com/recipe/33647/chocolate-ganache/",
                   # "https://www.allrecipes.com/recipe/23600/worlds-best-lasagna/",
                   # "https://www.allrecipes.com/recipe/12151/banana-cream-pie-i/",
                   # "https://www.allrecipes.com/recipe/12720/grilled-salmon-i/",
@@ -157,7 +157,7 @@ if __name__ == "__main__":
                   # "https://www.allrecipes.com/recipe/8302/banana-chocolate-chip-cake/",
                   # "https://www.allrecipes.com/recipe/59661/spinach-enchiladas/",
                   # "https://www.allrecipes.com/recipe/216564/swedish-meatballs-svenska-kottbullar/",
-                  # "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
+                  "https://www.allrecipes.com/recipe/218091/classic-and-simple-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/24074/alysias-basic-meat-lasagna/",
                   # "https://www.allrecipes.com/recipe/218120/hearty-meat-lasagna/"
                   ]

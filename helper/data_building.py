@@ -126,7 +126,7 @@ class Ingredient:
                                                v == self.fg_db[self.food_group]['food super group']]
                             if len(list_of_options) > 0:
                                 choice = random.choice(list_of_options)
-                                self.food_group = find_food_group(self.choice, food_dicts)
+                                self.food_group = find_food_group(choice, food_dicts)
                                 self.orig_name = choice
                     else:
                         if self.food_group in self.sub_dict[quality].values():

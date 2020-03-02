@@ -299,7 +299,7 @@ def find_all_str(phrase, string):
 COMMON_GARBAGE = ["cook ", "season ", "mix ", "melt ", "pour ", "the ", "<100> ", "<101> ",
                   "> ", "teaspoons ",
                   "tablespoons ", "teaspoon ", "tablespoon "]
-END_GARBAGE = ["mixture"]
+END_GARBAGE = [" mixture"]
 def remove_common_noise(string):
     for garbage in COMMON_GARBAGE:
         if string.startswith(garbage):
