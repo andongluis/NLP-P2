@@ -194,7 +194,7 @@ def extract_ingredient(in_string):
     # Obtain measurement
     measurement = get_measurement(in_string)
     if not measurement:
-        print(f"no measurement found in string {in_string}, gonna put 'unit' as default")
+        # print(f"no measurement found in string {in_string}, gonna put 'unit' as default")
         measurement = "unit"
     else:
         in_string = in_string.replace(measurement + " ", "")
@@ -410,7 +410,7 @@ def get_quantities_step(in_string):
     # Get placeholder dict for quantities, similar to ingredients above
 
     # To avoid doublin temperatures or times, lazy solution
-    if "degree" in in_string or "minute" in in_string or "seconds" in in_string:
+    if "degree" in in_string or "minute" in in_string or "seconds" in in_string or "hour" in in_string:
         return {"string": in_string, "placeholders": {}}
 
     counter = 100

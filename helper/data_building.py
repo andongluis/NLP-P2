@@ -292,8 +292,8 @@ def make_fg_db():
     for path in paths:
         if path[:3] == 'csv':
             df = pd.read_csv(path, encoding='latin1')
-            print(path)
-            print(list(df))
+            # print(path)
+            # print(list(df))
             fg_groups[path[4:-4]] = pd.Series(df.group.values, index=df.name).to_dict()
         elif path[-4:] == "xlsx":
             df = pd.read_excel(path, sheet_name=None)
@@ -320,5 +320,5 @@ def multiply_step(step, multiplier):
     for place_key, placeholder_dict in step.quant_placeholders.items():
         step.quant_placeholders[place_key]["quantity"] *= multiplier
 
-    step.verbose_print()
+    # step.verbose_print()
     return step

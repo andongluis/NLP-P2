@@ -43,7 +43,7 @@ def main(page_link):
     # Parse/Extract things
     str_dicts = list(chain.from_iterable([parsing.extract_ingredient(in_string) for in_string in ingreds]))
 
-    print(str_dicts)
+    # print(str_dicts)
 
     db = data_building.make_fg_db()
 
@@ -91,11 +91,11 @@ def main(page_link):
         if quality == "quit":
             return
 
-        print('Before transformation step')
+        # print('Before transformation step')
 
-        print(ingred_list)
+        # print(ingred_list)
 
-        print(steps_list)
+        # print(steps_list)
 
         food_dict = db[0]
 
@@ -111,11 +111,11 @@ def main(page_link):
                 multiplier = 0.5
             steps_list = [data_building.multiply_step(step, multiplier) for step in steps_list]
 
-        print('After transformation step')
+        # print('After transformation step')
 
-        print(ingred_list)
+        # print(ingred_list)
 
-        print(steps_list)
+        # print(steps_list)
 
         if quality == 'non-vegetarian':
             should_slap_meat = data_building.slap_some_meat_on_there(ingred_list)
