@@ -2,6 +2,8 @@
 
 Team Members: Alexander Einarsson, Andong Luis Li Zhao, Quinn Shim
 
+Project repo also found in: https://github.com/andongluis/NLP-P2
+
 ## Requirements
 
 Installation requirements are specified in the `requirements.txt` file.
